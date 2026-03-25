@@ -5,7 +5,7 @@
 - Pull requests
 - Branching
 
-## Trello
+## Jira
 - Sprint board
 - Backlog tracking
 
