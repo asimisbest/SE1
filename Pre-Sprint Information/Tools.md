@@ -13,7 +13,7 @@
 - Development environment
 - Extensions for linting/formatting
 
-## Baylon or three.js
+## Babylon or three.js
 - Javascript game engine
 
 ## Optional
