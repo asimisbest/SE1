@@ -1,0 +1,5 @@
+When commiting your code changes in github, DO NOT commit directly to main, instead click "Create a new branch for this commit and start a pull request". 
+
+Then make the pull request.
+
+This will allow the rest of the team to accept your merge request.
