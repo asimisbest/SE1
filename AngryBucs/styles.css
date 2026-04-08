@@ -29,4 +29,3 @@ button:hover{transform:translateY(-2px);}
 .modal-content button{width:100%;margin-top:10px;background:#d44c31;color:#fff;box-shadow:0 8px 18px rgba(212,76,49,0.3);}
 .hidden{display:none}
 @media (max-width:900px){.stage{margin:18px}}
-..
