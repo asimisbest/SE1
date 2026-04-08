@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Angry Bucs</title>
+  <title>My Game</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,10 +11,28 @@
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 
     <div id="menu" class="menu">
-      <h1 class="title">Awesome Game</h1>
-      <div class="buttons">
-        <button id="levelsBtn">Levels</button>
-        <button id="instructionsBtn">Instructions</button>
+      <div class="menu-card">
+        <div class="logo">☠️</div>
+        <h1 class="title">Angry Bucs</h1>
+        <p class="subtitle">Hoist the sails, load yer bombs, and sink the porky fleet!</p>
+        <div class="asset-row bucs">
+          <img src="../Assets/Buc/standardBuc.png" alt="Standard Buc" />
+          <img src="../Assets/Buc/fastBuc.png" alt="Fast Buc" />
+          <img src="../Assets/Buc/bombBuc.png" alt="Bomb Buc" />
+        </div>
+        <div class="asset-row pigs">
+          <img src="../Assets/Pigs/pig1.png" alt="Pig 1" />
+          <img src="../Assets/Pigs/pig2.png" alt="Pig 2" />
+        </div>
+        <div class="buttons">
+          <button id="startBtn">Start Voyage</button>
+          <button id="instructionsBtn">Instructions</button>
+        </div>
+
+        <div class="callout">
+          <span class="anchor">⚓</span>
+          Press Enter or tap the deck to begin
+        </div>
       </div>
     </div>
 
