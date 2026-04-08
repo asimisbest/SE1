@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>My Game</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="stage">
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+    <div id="menu" class="menu">
+      <h1 class="title">Awesome Game</h1>
+      <div class="buttons">
+        <button id="levelsBtn">Levels</button>
+        <button id="instructionsBtn">Instructions</button>
+      </div>
+    </div>
+
+    <div id="instructions" class="modal hidden">
+      <div class="modal-content">
+        <h2>Instructions</h2>
+        <p>Use arrow keys to move. Press Enter to start. This is a placeholder.</p>
+        <button id="closeInstructions">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
