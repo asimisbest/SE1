@@ -11,3 +11,4 @@ button:hover{transform:translateY(-2px)}
 .modal-content{background:#0f1724;padding:18px;border-radius:10px;max-width:560px;border:1px solid rgba(255,255,255,0.04)}
 .hidden{display:none}
 @media (max-width:900px){.stage{margin:18px}}
+..
