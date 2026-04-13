@@ -10,13 +10,16 @@
   <div class="stage">
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 
+    <!-- MAIN MENU -->
     <div id="menu" class="menu">
       <div class="menu-card">
         <div class="logo">☠️</div>
         <h1 class="title">Angry Bucs</h1>
         <p class="subtitle">Hoist the sails, load yer bombs, and sink the porky fleet!</p>
+        
         <div class="buttons">
           <button id="startBtn">Start Voyage</button>
+          <button id="levelsBtn">Levels</button> <!-- NEW BUTTON -->
           <button id="instructionsBtn">Instructions</button>
         </div>
 
@@ -27,13 +30,27 @@
       </div>
     </div>
 
+    <!-- LEVELS PAGE -->
+    <div id="levelsPage" class="modal hidden">
+      <div class="modal-content">
+        <h2>Select Level</h2>
+        <div id="levelGrid"></div>
+        <button id="backToMenu">Back</button>
+      </div>
+    </div>
+
+    <!-- INSTRUCTIONS -->
     <div id="instructions" class="modal hidden">
       <div class="modal-content">
         <h2>Instructions</h2>
-        <p>Use the arrow keys to steer the ship. Press Enter to launch your cannonballs at the greedy pigs.</p>
+        <p>Use your mouse or finger to change where the Buc is aiming.</p>
+        <p>After release, tap anywhere on the screen to activate the Buc's ability.</p>
+        <p>Destroy structures and eliminate pigs to increase your level score.</p>
+        <p>Eliminate all pigs to beat the level and advance!</p>
         <button id="closeInstructions">Back to Deck</button>
       </div>
     </div>
+
   </div>
 
   <script src="main.js"></script>
