@@ -1,4 +1,4 @@
-qconst; canvas = document.getElementById('gameCanvas');
+const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 const menu = document.getElementById('menu');
@@ -15,178 +15,127 @@ const backToMenu = document.getElementById('backToMenu');
 let running = false;
 let currentLevel = 1;
 let unlockedLevel = 1;
+let waveOffset = 0; // Move this globally so it persists
 
 // ================= MENU BUTTONS =================
 startBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  startGame();
+    e.stopPropagation();
+    startGame();
 });
 
 instructionsBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  instructionsModal.classList.remove('hidden');
+    e.stopPropagation();
+    instructionsModal.classList.remove('hidden');
 });
 
 closeInstructions.addEventListener('click', () => {
-  instructionsModal.classList.add('hidden');
+    instructionsModal.classList.add('hidden');
 });
 
-// OPEN LEVELS PAGE
 levelsBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  menu.style.display = 'none';
-  levelsPage.classList.remove('hidden');
-  createLevels();
+    e.stopPropagation();
+    menu.style.display = 'none';
+    levelsPage.classList.remove('hidden');
+    createLevels(); // Re-builds the grid based on unlockedLevel
 });
 
-// BACK TO MENU FROM LEVELS
 backToMenu.addEventListener('click', () => {
-  levelsPage.classList.add('hidden');
-  menu.style.display = 'flex';
-});
-
-// CLICK BACKGROUND TO START
-menu.addEventListener('click', (e) => {
-  if (e.target.tagName === 'BUTTON') return;
-  startGame();
+    levelsPage.classList.add('hidden');
+    menu.style.display = 'flex';
 });
 
 // ================= LEVEL SYSTEM =================
 function createLevels() {
-  levelGrid.innerHTML = '';
+    levelGrid.innerHTML = '';
+    for (let i = 1; i <= 10; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = 'Level ' + i;
+        btn.className = 'level-btn'; // Useful for CSS styling
 
-  for (let i = 1; i <= 10; i++) {
-    const btn = document.createElement('button');
-    btn.textContent = 'Level ' + i;
+        if (i > unlockedLevel) {
+            btn.disabled = true;
+            btn.style.opacity = 0.5;
+        }
 
-    if (i > unlockedLevel) {
-      btn.disabled = true;
-      btn.style.opacity = 0.5;
+        btn.addEventListener('click', () => {
+            startLevel(i);
+        });
+        levelGrid.appendChild(btn);
     }
-
-    btn.addEventListener('click', () => {
-      startLevel(i);
-    });
-
-    levelGrid.appendChild(btn);
-  }
 }
 
 function startLevel(level) {
-  currentLevel = level;
-  levelsPage.classList.add('hidden');
-  running = true;
-
-  console.log("Starting Level:", level);
+    currentLevel = level;
+    levelsPage.classList.add('hidden');
+    running = true;
 }
 
-// ================= GAME CONTROL =================
 function startGame() {
-  currentLevel = 1;
-  menu.style.display = 'none';
-  instructionsModal.classList.add('hidden');
-  running = true;
+    currentLevel = 1;
+    menu.style.display = 'none';
+    instructionsModal.classList.add('hidden');
+    running = true;
 }
 
-// ================= RENDER =================
-function clear() {
-  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  gradient.addColorStop(0, '#06101f');
-  gradient.addColorStop(0.6, '#08101a');
-  gradient.addColorStop(1, '#020507');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+// ================= RENDER FUNCTIONS =================
+function drawBackground() {
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#030812');   
+    gradient.addColorStop(0.4, '#071a2b'); 
+    gradient.addColorStop(1, '#020507');   
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function renderSea() {
-  waveOffset += 0.3;
+    waveOffset += 0.05; // Slower, smoother movement
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.15)';
+    ctx.lineWidth = 2;
 
-  ctx.strokeStyle = 'rgba(255, 215, 0, 0.10)';
-  ctx.lineWidth = 2;
-  let waveOffset = 0;
-
-  for (let y = 80; y < canvas.height; y += 40) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-
-    ctx.bezierCurveTo(
-        200, y - 14 + Math.sin(waveOffset) * 2,
-        400, y + 14,
-        800, y + Math.cos(waveOffset) * 2
-    );
-
-    ctx.stroke();
-  }
+    for (let y = 150; y < canvas.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        // Using waveOffset here creates the animation
+        ctx.bezierCurveTo(
+            200, y - 14 + Math.sin(waveOffset) * 10,
+            400, y + 14 + Math.cos(waveOffset) * 10,
+            canvas.width, y
+        );
+        ctx.stroke();
+    }
 }
 
-  function render() {
-    function clear() {
-      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-
-      gradient.addColorStop(0, '#030812');   // deep night sky
-      gradient.addColorStop(0.4, '#071a2b'); // ocean horizon
-      gradient.addColorStop(1, '#020507');   // deep sea
-
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // subtle "fog" glow
-      ctx.fillStyle = 'rgba(255, 215, 0, 0.03)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
+function render() {
+    drawBackground();
     renderSea();
 
     if (!running) {
-      ctx.fillStyle = '#f7d17a';
-      ctx.font = '18px Georgia, serif';
-      ctx.fillText('Tap the deck or press Enter to raise the sails.', 18, 32);
-      return;
+        ctx.fillStyle = '#f7d17a';
+        ctx.font = '18px Georgia, serif';
+        ctx.fillText('Tap the deck or press Enter to raise the sails.', 18, 32);
+        return;
     }
 
     ctx.fillStyle = '#f9d56e';
     ctx.font = '24px Georgia, serif';
-    ctx.fillText('The voyage has begun... prepare to fire!', 16, 40);
-  }
-
-<<<<<<< HEAD
-  ctx.fillStyle = '#f9d56e';
-  ctx.font = '24px Georgia, serif';
-  ctx.fillText(`Level ${currentLevel} - The voyage has begun...`, 16, 40);
+    ctx.fillText(`Level ${currentLevel} - The voyage has begun...`, 16, 40);
 }
 
 // ================= GAME LOOP =================
 function loop() {
-  render();
-  requestAnimationFrame(loop);
+    render();
+    requestAnimationFrame(loop);
 }
 
 // ================= KEY CONTROLS =================
 window.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') startGame();
-
-  if (e.key === 'Escape') {
-    running = false;
-    levelsPage.classList.add('hidden');
-    menu.style.display = 'flex';
-  }
+    if (e.key === 'Enter' && !running) startGame();
+    if (e.key === 'Escape') {
+        running = false;
+        levelsPage.classList.add('hidden');
+        menu.style.display = 'flex';
+    }
 });
 
-// ================= START =================
+// Start the loop once
 requestAnimationFrame(loop);
-=======
-  function loop() {
-    render();
-    requestAnimationFrame(loop);
-  }
-
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') startGame();
-    if (e.key === 'Escape') {
-      running = false;
-      menu.style.display = 'flex';
-    }
-  });
-
-  requestAnimationFrame(loop);
->>>>>>> 5225cd39097020197e31d7a2cc672dc6948819ec
