@@ -28,5 +28,5 @@ button:hover{transform:translateY(-2px);}
 .modal-content p{color:#e6d8b5;line-height:1.75;margin:16px 0;}
 .modal-content button{width:100%;margin-top:10px;background:#d44c31;color:#fff;box-shadow:0 8px 18px rgba(212,76,49,0.3);}
 .hidden{display:none}
-@media (max-width:900px){.stage{margin:18px}}
-..
+@media (max-width:900px){.stage{margin:18px auto;width:auto;padding:0 12px;}}
+
