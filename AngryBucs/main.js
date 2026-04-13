@@ -1,4 +1,4 @@
-const canvas = document.getElementById('gameCanvas');
+qconst; canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 const menu = document.getElementById('menu');
@@ -99,27 +99,57 @@ function clear() {
 }
 
 function renderSea() {
-  ctx.strokeStyle = 'rgba(255, 215, 0, 0.15)';
+  waveOffset += 0.3;
+
+  ctx.strokeStyle = 'rgba(255, 215, 0, 0.10)';
   ctx.lineWidth = 2;
+  let waveOffset = 0;
+
   for (let y = 80; y < canvas.height; y += 40) {
     ctx.beginPath();
     ctx.moveTo(0, y);
-    ctx.bezierCurveTo(200, y - 14, 400, y + 14, 800, y);
+
+    ctx.bezierCurveTo(
+        200, y - 14 + Math.sin(waveOffset) * 2,
+        400, y + 14,
+        800, y + Math.cos(waveOffset) * 2
+    );
+
     ctx.stroke();
   }
 }
 
-function render() {
-  clear();
-  renderSea();
+  function render() {
+    function clear() {
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
 
-  if (!running) {
-    ctx.fillStyle = '#f7d17a';
-    ctx.font = '18px Georgia, serif';
-    ctx.fillText('Tap the deck or press Enter to raise the sails.', 18, 32);
-    return;
+      gradient.addColorStop(0, '#030812');   // deep night sky
+      gradient.addColorStop(0.4, '#071a2b'); // ocean horizon
+      gradient.addColorStop(1, '#020507');   // deep sea
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // subtle "fog" glow
+      ctx.fillStyle = 'rgba(255, 215, 0, 0.03)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    renderSea();
+
+    if (!running) {
+      ctx.fillStyle = '#f7d17a';
+      ctx.font = '18px Georgia, serif';
+      ctx.fillText('Tap the deck or press Enter to raise the sails.', 18, 32);
+      return;
+    }
+
+    ctx.fillStyle = '#f9d56e';
+    ctx.font = '24px Georgia, serif';
+    ctx.fillText('The voyage has begun... prepare to fire!', 16, 40);
   }
 
+<<<<<<< HEAD
   ctx.fillStyle = '#f9d56e';
   ctx.font = '24px Georgia, serif';
   ctx.fillText(`Level ${currentLevel} - The voyage has begun...`, 16, 40);
@@ -144,3 +174,19 @@ window.addEventListener('keydown', (e) => {
 
 // ================= START =================
 requestAnimationFrame(loop);
+=======
+  function loop() {
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') startGame();
+    if (e.key === 'Escape') {
+      running = false;
+      menu.style.display = 'flex';
+    }
+  });
+
+  requestAnimationFrame(loop);
+>>>>>>> 5225cd39097020197e31d7a2cc672dc6948819ec
