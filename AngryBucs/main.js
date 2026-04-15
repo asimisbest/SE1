@@ -227,8 +227,11 @@ function render() {
     }
 
     // HUD
+    ctx.font = 'bold 28px Georgia, serif';
+    ctx.strokeStyle = '#7a3e00';
+    ctx.lineWidth = 4;
+    ctx.strokeText(`Level ${currentLevel}`, 16, 40);
     ctx.fillStyle = '#f9d56e';
-    ctx.font = '24px Georgia, serif';
     ctx.fillText(`Level ${currentLevel}`, 16, 40);
 
     drawCannon();
