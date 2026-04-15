@@ -1,4 +1,4 @@
-import { Block } from "./Block.js";
+import { Block } from "./../Block.js";
 
 export class WoodBlock extends Block {
   constructor(options = {}) {

@@ -1,4 +1,4 @@
-import { Ability } from "./Ability.js";
+import { Ability } from "./../Ability.js";
 
 export class Fast extends Ability {
   constructor() {

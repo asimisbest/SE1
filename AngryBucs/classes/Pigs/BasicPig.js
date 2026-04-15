@@ -1,4 +1,4 @@
-import { Pig } from "./Pig.js";
+import { Pig } from "./../Pig.js";
 
 export class BasicPig extends Pig {
   constructor(options = {}) {
