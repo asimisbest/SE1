@@ -79,57 +79,73 @@ function startGame() {
 
 // ================= RENDER FUNCTIONS =================
 function drawBackground() {
-    // Sky gradient
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#020c1b');
-    gradient.addColorStop(0.6, '#071a2b');
-    gradient.addColorStop(1, '#0a1f35');
+    gradient.addColorStop(0, '#1a8fd1');
+    gradient.addColorStop(0.5, '#4db8e8');
+    gradient.addColorStop(1, '#87ceeb');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    drawStars();
-    drawMoon();
+    drawSun();
+    drawClouds();
     drawWater();
     drawGround();
 }
 
-function drawStars() {
-    const stars = [
-        {x: 80, y: 30}, {x: 150, y: 55}, {x: 240, y: 20}, {x: 320, y: 45},
-        {x: 410, y: 25}, {x: 500, y: 50}, {x: 580, y: 18}, {x: 660, y: 38},
-        {x: 720, y: 22}, {x: 760, y: 55}, {x: 340, y: 70}, {x: 460, y: 65}
+function drawClouds() {
+    const clouds = [
+        {x: 100, y: 50, s: 1},
+        {x: 320, y: 35, s: 0.8},
+        {x: 520, y: 55, s: 1.1},
     ];
-    stars.forEach(s => {
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, 1.2, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,220,0.85)';
-        ctx.fill();
+
+    clouds.forEach(c => {
+        ctx.save();
+        ctx.translate(c.x, c.y);
+        ctx.scale(c.s, c.s);
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+
+        ctx.beginPath(); ctx.arc(0, 0, 22, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(28, 5, 18, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(-25, 5, 16, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(10, -10, 20, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
     });
 }
 
-function drawMoon() {
+function drawSun() {
+    // Glow
+    const glow = ctx.createRadialGradient(700, 60, 10, 700, 60, 55);
+    glow.addColorStop(0, 'rgba(255,240,100,0.5)');
+    glow.addColorStop(1, 'rgba(255,200,0,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(645, 5, 110, 110);
+
+    // Sun circle
     ctx.beginPath();
-    ctx.arc(720, 55, 28, 0, Math.PI * 2);
-    ctx.fillStyle = '#f5e9a0';
+    ctx.arc(700, 60, 32, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffe94d';
     ctx.fill();
-    // Crescent shadow
-    ctx.beginPath();
-    ctx.arc(730, 50, 24, 0, Math.PI * 2);
-    ctx.fillStyle = '#071a2b';
-    ctx.fill();
+    ctx.strokeStyle = '#ffb700';
+    ctx.lineWidth = 3;
+    ctx.stroke();
 }
 
 function drawWater() {
     waveOffset += 0.03;
 
-    // Water base
-    ctx.fillStyle = '#0a2540';
+    // Bright ocean base
+    ctx.fillStyle = '#1a9dc4';
     ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+
+    // Lighter shimmer layer
+    ctx.fillStyle = '#2ab8e0';
+    ctx.fillRect(0, canvas.height - 80, canvas.width, 20);
 
     // Wave lines
     for (let w = 0; w < 3; w++) {
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(100,180,255,${0.12 + w * 0.06})`;
+        ctx.strokeStyle = `rgba(255,255,255,${0.2 + w * 0.08})`;
         ctx.lineWidth = 2;
         const yBase = canvas.height - 75 + w * 18;
         for (let x = 0; x <= canvas.width; x += 4) {
@@ -211,8 +227,11 @@ function render() {
     }
 
     // HUD
+    ctx.font = 'bold 28px Georgia, serif';
+    ctx.strokeStyle = '#7a3e00';
+    ctx.lineWidth = 4;
+    ctx.strokeText(`Level ${currentLevel}`, 16, 40);
     ctx.fillStyle = '#f9d56e';
-    ctx.font = '24px Georgia, serif';
     ctx.fillText(`Level ${currentLevel}`, 16, 40);
 
     drawCannon();

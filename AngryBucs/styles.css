@@ -8,19 +8,11 @@ html,
 body {
 	height: 100%;
 	margin: 0;
-	font-family: Georgia, 'Times New Roman', Times, serif;
-	background: #08101d;
-	color: #f9d56e;
-}
-
-body {
-	height: 100%;
-	margin: 0;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	font-family: Georgia, 'Times New Roman', Times, serif;
-	background: radial-gradient(circle at top, #2b324f 0%, #09111e 40%, #04080f 100%);
+	background: radial-gradient(circle at top, #2b324f 0%, #1f3b69 40%, #1f3b69 100%);
 	color: #f9d56e;
 }
 
