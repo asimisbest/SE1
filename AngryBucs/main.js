@@ -87,27 +87,13 @@ function drawBackground() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function renderSea() {
-    waveOffset += 0.05; // Slower, smoother movement
-    ctx.strokeStyle = 'rgba(255, 215, 0, 0.15)';
-    ctx.lineWidth = 2;
 
-    for (let y = 150; y < canvas.height; y += 40) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        // Using waveOffset here creates the animation
-        ctx.bezierCurveTo(
-            200, y - 14 + Math.sin(waveOffset) * 10,
-            400, y + 14 + Math.cos(waveOffset) * 10,
-            canvas.width, y
-        );
-        ctx.stroke();
-    }
-}
+
+
+
 
 function render() {
     drawBackground();
-    renderSea();
 
     if (!running) {
         ctx.fillStyle = '#f7d17a';
@@ -118,7 +104,7 @@ function render() {
 
     ctx.fillStyle = '#f9d56e';
     ctx.font = '24px Georgia, serif';
-    ctx.fillText(`Level ${currentLevel} - The voyage has begun...`, 16, 40);
+    ctx.fillText(`Level ${currentLevel}`, 16, 40);
 }
 
 // ================= GAME LOOP =================
