@@ -1,0 +1,46 @@
+Angry Bucs Description:
+	Angry Bucs is a browser-based, single-player physics puzzle game built as a lightweight classroom project. The game is inspired by the general idea of launching a 
+	projectile at targets, but it uses an original pirate and school-mascot theme rather than copyrighted assets or direct copies of existing games. The player controls 
+	a cannon and launches “Bucs,” which are pirate-themed projectiles based on a buccaneer mascot, toward pigs placed on or inside structures. The goal of each level is 
+	to eliminate all pigs either by directly hitting them with a Buc or by causing surrounding structures to collapse onto them. The gameplay should be short and easy to 
+	pick up, making it suitable for quick play sessions between classes.
+	
+	The game must be designed to run inside a browser and be playable on a smartphone. It should use JavaScript, or another browser-compatible language, and fit within a 
+	fixed game canvas of either 400x400 pixels or 800x400 pixels. Controls should be touch-friendly, such as tap, drag, release, or swipe, though mouse support is also 
+	acceptable for testing on desktop. The overall project must remain lightweight, with the total file size of the game and all required assets staying under 10MB. Any 
+	non-JavaScript files needed to run the game must be included in the project folder.
+	
+	The game should include a start screen, instructions screen, level selection, gameplay screen, and win/lose end screens. The start screen should clearly present the 
+	game title and menu options such as Start Game, Level Select, and Instructions. The instructions screen should explain how to aim, launch a Buc, complete a level, and 
+	lose a level. The end screens should provide feedback on whether the player won or lost, display the score, and provide options such as retrying the level, continuing 
+	if applicable, or returning to the main menu.
+	
+	Core gameplay centers on aiming and launching Bucs from a cannon. The cannon should allow the player to control the launch direction, enforce a minimum and maximum angle,
+	and show a trajectory preview before firing. Once launched, a Buc travels through the level and interacts with pigs and structures using collision and simple physics. At 
+	minimum, pigs should be defeated when directly hit. Structures should react to impacts, and if the physics system is advanced enough, falling debris may also damage or 
+	eliminate pigs. The player wins when all pigs in the level are eliminated. The player loses when no Bucs remain and pigs are still alive.
+	
+	Levels should be prebuilt rather than randomly generated. The original full concept included multiple levels, varying Buc counts, and different structure materials such 
+	as wood, glass, and stone, but because this is a small class project, the implementation may be reduced to a smaller playable prototype first. The project should still be 
+	organized in a way that allows more levels, materials, or Buc types to be added later if time permits. A simple score system should reward the player for defeating pigs 
+	and damaging or destroying structures. The score should be visible during or after gameplay, and it may optionally be saved locally as a high score if that feature is 
+	implemented.
+	
+	The project also has important non-functional requirements. It must remain school-appropriate and must not contain offensive material, gore, drugs, suggestive content, 
+	illegal content, racially insensitive material, advertisements, or malicious software. It must not use copyrighted Angry Birds assets, exact names, or copied art. It 
+	should avoid excessive flashing lights or loud sounds. It must not collect user data beyond the bare minimum needed for local progress or score saving. Any saved data 
+	should stay local, such as in browser localStorage, rather than being sent to a server.
+	
+	From a development perspective, the game should be simple, maintainable, and understandable for a student Scrum team. The code should be organized cleanly, the gameplay 
+	loop should be clear, and the feature set should be broken into achievable backlog items. The most important version of the project is a small but complete vertical slice:
+	menu, instructions, one playable level, aiming and launching, pigs on structures, collisions, win/lose detection, score, and end screens. Additional features like more 
+	levels, special Buc abilities, multiple Buc types, advanced material behaviors, and saved high scores can be treated as stretch goals if time allows.
+	
+Shorter AI Description: 
+	Angry Bucs is a browser-based, single-player, mobile-friendly physics puzzle game with an original pirate school-mascot theme. The player uses a cannon to launch 
+	pirate-themed “Bucs” at pigs placed on or inside structures. The objective is to eliminate all pigs by direct hits or by collapsing structures onto them. The game should 
+	be short-session friendly, playable in a smartphone browser, and built with JavaScript or another browser-compatible language. It should include a start menu, instructions
+	screen, level selection, gameplay, score tracking, and win/lose end screens. The cannon should support aiming, launch angle limits, and trajectory preview. The game must 
+	fit within a 400x400 or 800x400 canvas, stay under 10MB total file size, avoid copyrighted assets, remain school-appropriate, and not collect user data beyond minimal 
+	local save data. The project should be built as a small but complete class project prototype, with one or more playable levels and clean, maintainable code that can be 
+	extended later.
