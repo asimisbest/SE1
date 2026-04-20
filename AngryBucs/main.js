@@ -301,7 +301,7 @@ function drawTrajectoryPreview() {
 
   const { x: startX, y: startY } = cannon.getBarrelTip();
 
-  ctx.fillStyle = 'rgba(255, 230, 120, 0.85)';
+  ctx.fillStyle = '#ffffff';
 
   for (let t = 0; t <= 2; t += 0.08) {
     const px = startX + vx * t;
