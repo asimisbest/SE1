@@ -68,6 +68,8 @@ export class Level {
     if (this.cannon) this.cannon.draw(ctx);
     for (const block of this.blocks) block.draw(ctx);
     for (const pig of this.pigs) pig.draw(ctx);
-    for (const buc of this.bucs) buc.draw(ctx);
+    for (const buc of this.bucs) {
+    if (buc.hasBeenShot) buc.draw(ctx);
+}
   }
 }
