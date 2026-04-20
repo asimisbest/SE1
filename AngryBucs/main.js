@@ -324,10 +324,8 @@ function render() {
     ctx.strokeStyle = '#7a3e00';
     ctx.lineWidth = 4;
     ctx.strokeText(`Level ${currentLevel}`, 16, 40);
-
     ctx.fillStyle = '#f9d56e';
-    ctx.font = 'bold 24px Georgia';
-    ctx.fillText(`Level ${currentLevel}`, 20, 40);
+    ctx.fillText(`Level ${currentLevel}`, 16, 40);
 
     if (level) {
       level.draw(ctx);
