@@ -31,6 +31,13 @@ let waveOffset = 0;
 let level = null;
 let lastTime = null;
 
+let aimX = 140;
+let aimY = canvas.height - 160;
+let isAiming = false;
+
+const gravity = 900; // pixels/sec^2
+const maxPower = 650;
+
 // ================= NAVIGATION =================
 
 startBtn.onclick = () => startLevel(1);
@@ -52,6 +59,68 @@ exitBtn.onclick = () => {
     gameHUD.classList.add('hidden');
     menu.style.display = 'flex';
 };
+
+
+canvas.addEventListener('mousemove', (e) => {
+  if (!running) return;
+
+  const pos = getMousePos(e);
+  aimX = pos.x;
+  aimY = pos.y;
+
+  updateCannonAngle(); // ✅ ADD THIS
+});
+
+canvas.addEventListener('mouseleave', () => {
+  isAiming = false;
+});
+
+canvas.addEventListener('mousedown', (e) => {
+  if (!running) return;
+
+  if (e.button === 0) { // left click only
+    isAiming = true;
+  }
+});
+
+canvas.addEventListener('mouseup', () => {
+  isAiming = false;
+});
+
+
+
+canvas.addEventListener('touchstart', (e) => {
+  if (!running) return;
+
+  const touch = e.touches[0];
+  const pos = getMousePos(touch);
+  aimX = pos.x;
+  aimY = pos.y;
+
+  updateCannonAngle(); // ✅ ADD HERE TOO
+
+  isAiming = true;
+
+  e.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+  if (!running) return;
+
+  const touch = e.touches[0];
+  const pos = getMousePos(touch);
+  aimX = pos.x;
+  aimY = pos.y;
+
+  updateCannonAngle(); // ✅ ADD THIS
+
+  e.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => {
+  isAiming = false;
+});
+
 
 function createLevels() {
     levelGrid.innerHTML = '';
@@ -190,20 +259,82 @@ function drawBackground() {
     ctx.fillRect(0, canvas.height - 95, canvas.width, 8);
 }
 
-function render() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBackground();
+function updateCannonAngle() {
+  if (!level || !level.cannon) return;
 
-    if (running && level) {
-        ctx.font = 'bold 28px Georgia, serif';
-        ctx.strokeStyle = '#7a3e00';
-        ctx.lineWidth = 4;
-        ctx.strokeText(`Level ${currentLevel}`, 16, 40);
-        ctx.fillStyle = '#f9d56e';
-        ctx.fillText(`Level ${currentLevel}`, 16, 40);
-        level.cannon.draw(ctx);
-        level.draw(ctx);
+  const cannon = level.cannon;
+  const dx = aimX - cannon.x;
+  const dy = aimY - (cannon.y - 8);
+
+  let angle = Math.atan2(dy, dx);
+
+  const minAngle = -Math.PI * 0.85;
+  const maxAngle = -Math.PI * 0.1;
+
+  cannon.angle = Math.max(minAngle, Math.min(maxAngle, angle));
+}
+
+function getMousePos(evt) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+
+  return {
+    x: (evt.clientX - rect.left) * scaleX,
+    y: (evt.clientY - rect.top) * scaleY
+  };
+}
+
+function drawTrajectoryPreview() {
+  if (!running || !isAiming || !level || !level.cannon) return;
+
+  const cannon = level.cannon;
+  const angle = cannon.angle;
+
+  const dx = aimX - cannon.x;
+  const dy = aimY - cannon.y;
+  const distance = Math.hypot(dx, dy);
+  const power = Math.min(distance * 3, maxPower);
+
+  const vx = Math.cos(angle) * power;
+  const vy = Math.sin(angle) * power;
+
+  const { x: startX, y: startY } = cannon.getBarrelTip();
+
+  ctx.fillStyle = 'rgba(255, 230, 120, 0.85)';
+
+  for (let t = 0; t <= 2; t += 0.08) {
+    const px = startX + vx * t;
+    const py = startY + vy * t + 0.5 * gravity * t * t;
+
+    if (px < 0 || px > canvas.width || py > canvas.height) break;
+
+    ctx.beginPath();
+    ctx.arc(px, py, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBackground();
+
+  if (running) {
+    ctx.font = 'bold 28px Georgia, serif';
+    ctx.strokeStyle = '#7a3e00';
+    ctx.lineWidth = 4;
+    ctx.strokeText(`Level ${currentLevel}`, 16, 40);
+
+    ctx.fillStyle = '#f9d56e';
+    ctx.font = 'bold 24px Georgia';
+    ctx.fillText(`Level ${currentLevel}`, 20, 40);
+
+    if (level) {
+      level.draw(ctx);
+      level.cannon.draw(ctx);
+      drawTrajectoryPreview();
     }
+  }
 }
 
 // ================= GAME LOOP =================
