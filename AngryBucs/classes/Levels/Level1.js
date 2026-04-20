@@ -9,7 +9,7 @@ export class Level1 extends Level {
   constructor() {
     super({
       ground: 500,
-      cannon: new Cannon({ x: 80, y: 305 }),
+      cannon: new Cannon({ x: 80, y: 305, velocityMultiplier: 1 }),
 
       bucs: [
         { type: Buc },

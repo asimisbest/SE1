@@ -147,7 +147,7 @@ function startLevel(num) {
 
 // ================= PHYSICS / COLLISIONS =================
 
-const GROUND_Y = canvas.height - 90;
+const GROUND_Y = canvas.height - 120;
 const DAMAGE_THRESHOLD = 100;
 
 function resolveGroundCollisions(entities) {
@@ -296,8 +296,8 @@ function drawTrajectoryPreview() {
   const distance = Math.hypot(dx, dy);
   const power = Math.min(distance * 3, maxPower);
 
-  const vx = Math.cos(angle) * power;
-  const vy = Math.sin(angle) * power;
+  const vx = Math.cos(angle) * power * cannon.velocityMultiplier;
+  const vy = Math.sin(angle) * power * cannon.velocityMultiplier;
 
   const { x: startX, y: startY } = cannon.getBarrelTip();
 

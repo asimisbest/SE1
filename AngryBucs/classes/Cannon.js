@@ -1,8 +1,9 @@
 export class Cannon {
-  constructor({ x = 80, y = 305, angle = -Math.PI / 6 } = {}) {
+  constructor({ x = 80, y = 305, angle = -Math.PI / 6, velocityMultiplier = 1 } = {}) {
     this.x = x;
     this.y = y;
     this.angle = angle;
+    this.velocityMultiplier = velocityMultiplier;
   }
 
   getBarrelTip() {
