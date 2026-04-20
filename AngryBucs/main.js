@@ -262,17 +262,7 @@ function drawBackground() {
 function updateCannonAngle() {
   if (!level || !level.cannon) return;
 
-    if (running && level) {
-        ctx.font = 'bold 28px Georgia, serif';
-        ctx.strokeStyle = '#7a3e00';
-        ctx.lineWidth = 4;
-        ctx.strokeText(`Level ${currentLevel}`, 16, 40);
-        ctx.fillStyle = '#f9d56e';
-        ctx.fillText(`Level ${currentLevel}`, 16, 40);
-        level.cannon.draw(ctx);
-        level.draw(ctx);
   const cannon = level.cannon;
-
   const dx = aimX - cannon.x;
   const dy = aimY - (cannon.y - 8);
 
@@ -340,6 +330,7 @@ function render() {
     ctx.fillText(`Level ${currentLevel}`, 20, 40);
 
     if (level) {
+      level.draw(ctx);
       level.cannon.draw(ctx);
       drawTrajectoryPreview();
     }
