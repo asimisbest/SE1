@@ -19,11 +19,17 @@ const gameHUD = document.getElementById('gameHUD');
 const retryBtn = document.getElementById('retryBtn');
 const exitBtn = document.getElementById('exitBtn');
 
+// Registry — add new level classes here as they are created
+const LEVELS = {
+    1: Level1,
+};
+
 let running = false;
 let currentLevel = 1;
 let unlockedLevel = 1;
 let waveOffset = 0;
 let level = null;
+let lastTime = null;
 
 // ================= NAVIGATION =================
 
@@ -42,6 +48,7 @@ retryBtn.onclick = () => startLevel(currentLevel);
 
 exitBtn.onclick = () => {
     running = false;
+    level = null;
     gameHUD.classList.add('hidden');
     menu.style.display = 'flex';
 };
@@ -51,20 +58,91 @@ function createLevels() {
     for (let i = 1; i <= 10; i++) {
         const btn = document.createElement('button');
         btn.textContent = i;
-        if (i > unlockedLevel) btn.disabled = true;
+        if (i > unlockedLevel || !LEVELS[i]) btn.disabled = true;
         btn.onclick = () => startLevel(i);
         levelGrid.appendChild(btn);
     }
 }
 
 function startLevel(num) {
+    const LevelClass = LEVELS[num];
+    if (!LevelClass) return;
     currentLevel = num;
-    level = new Level1();
+    level = new LevelClass();
     level.build();
     menu.style.display = 'none';
     levelsPage.classList.add('hidden');
     gameHUD.classList.remove('hidden');
     running = true;
+}
+
+// ================= PHYSICS / COLLISIONS =================
+
+const GROUND_Y = canvas.height - 90;
+const DAMAGE_THRESHOLD = 100;
+
+function resolveGroundCollisions(entities) {
+    for (const e of entities) {
+        const b = e.getBounds();
+        if (b.bottom >= GROUND_Y) {
+            e.position.y -= b.bottom - GROUND_Y;
+            const impact = Math.abs(e.physical.velocity.y);
+            e.physical.velocity.y = -e.physical.velocity.y * e.physical.restitution;
+            e.physical.velocity.x *= 0.85;
+            if (impact > DAMAGE_THRESHOLD) e.takeDamage(impact * 0.05);
+        }
+    }
+}
+
+function resolveAABB(a, b) {
+    const ba = a.getBounds(), bb = b.getBounds();
+    const overlapX = Math.min(ba.right, bb.right) - Math.max(ba.left, bb.left);
+    const overlapY = Math.min(ba.bottom, bb.bottom) - Math.max(ba.top, bb.top);
+    if (overlapX <= 0 || overlapY <= 0) return;
+
+    const mA = a.physical.mass, mB = b.physical.mass;
+    const total = mA + mB;
+    const e = (a.physical.restitution + b.physical.restitution) / 2;
+
+    if (overlapX < overlapY) {
+        const pushA = (overlapX * mB) / total;
+        const pushB = (overlapX * mA) / total;
+        if (a.position.x < b.position.x) { a.position.x -= pushA; b.position.x += pushB; }
+        else                              { a.position.x += pushA; b.position.x -= pushB; }
+        const relVx = a.physical.velocity.x - b.physical.velocity.x;
+        const impulse = -(1 + e) * relVx * mA * mB / total;
+        a.physical.velocity.x += impulse / mA;
+        b.physical.velocity.x -= impulse / mB;
+        const impact = Math.abs(relVx);
+        if (impact > DAMAGE_THRESHOLD) { const dmg = impact * 0.1; a.takeDamage(dmg); b.takeDamage(dmg); }
+    } else {
+        const pushA = (overlapY * mB) / total;
+        const pushB = (overlapY * mA) / total;
+        if (a.position.y < b.position.y) { a.position.y -= pushA; b.position.y += pushB; }
+        else                              { a.position.y += pushA; b.position.y -= pushB; }
+        const relVy = a.physical.velocity.y - b.physical.velocity.y;
+        const impulse = -(1 + e) * relVy * mA * mB / total;
+        a.physical.velocity.y += impulse / mA;
+        b.physical.velocity.y -= impulse / mB;
+        const impact = Math.abs(relVy);
+        if (impact > DAMAGE_THRESHOLD) { const dmg = impact * 0.1; a.takeDamage(dmg); b.takeDamage(dmg); }
+    }
+}
+
+function resolveEntityCollisions(entities) {
+    for (let i = 0; i < entities.length; i++) {
+        for (let j = i + 1; j < entities.length; j++) {
+            resolveAABB(entities[i], entities[j]);
+        }
+    }
+}
+
+function update(dt) {
+    if (!running || !level) return;
+    level.update(dt);
+    const alive = level.getAllEntities().filter(e => e.alive);
+    resolveGroundCollisions(alive);
+    resolveEntityCollisions(alive);
 }
 
 // ================= DRAWING =================
@@ -116,18 +194,25 @@ function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
 
-    if (running) {
+    if (running && level) {
         ctx.font = 'bold 28px Georgia, serif';
         ctx.strokeStyle = '#7a3e00';
         ctx.lineWidth = 4;
         ctx.strokeText(`Level ${currentLevel}`, 16, 40);
         ctx.fillStyle = '#f9d56e';
         ctx.fillText(`Level ${currentLevel}`, 16, 40);
-        if (level) level.cannon.draw(ctx);
+        level.cannon.draw(ctx);
+        level.draw(ctx);
     }
 }
 
-function loop() {
+// ================= GAME LOOP =================
+
+function loop(timestamp) {
+    if (lastTime === null) lastTime = timestamp;
+    const dt = Math.min((timestamp - lastTime) / 1000, 0.05); // cap at 50ms to avoid spiral
+    lastTime = timestamp;
+    update(dt);
     render();
     requestAnimationFrame(loop);
 }
@@ -136,9 +221,10 @@ window.onkeydown = (e) => {
     if (e.key === 'Enter' && !running) startLevel(1);
     if (e.key === 'Escape' && running) {
         running = false;
+        level = null;
         gameHUD.classList.add('hidden');
         menu.style.display = 'flex';
     }
 };
 
-loop();
+requestAnimationFrame(loop);
