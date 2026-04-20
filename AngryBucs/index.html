@@ -3,20 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>My Game</title>
+  <title>Angry Bucs</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="stage">
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 
+    <div id="gameHUD" class="hud hidden">
+      <button id="retryBtn" class="hud-btn">Retry</button>
+      <button id="exitBtn" class="hud-btn exit">Menu</button>
+    </div>
+
     <div id="menu" class="menu">
       <div class="menu-card">
         <div class="logo">☠️</div>
         <h1 class="title">Angry Bucs</h1>
         <p class="subtitle">Hoist the sails, load yer bombs, and sink the porky fleet!</p>
+
         <div class="buttons">
           <button id="startBtn">Start Voyage</button>
+          <button id="levelsBtn">Levels</button>
           <button id="instructionsBtn">Instructions</button>
         </div>
 
@@ -24,6 +31,14 @@
           <span class="anchor">⚓</span>
           Press Enter or tap the deck to begin
         </div>
+      </div>
+    </div>
+
+    <div id="levelsPage" class="modal hidden">
+      <div class="modal-content">
+        <h2>Select Level</h2>
+        <div id="levelGrid"></div>
+        <button id="backToMenu">Back</button>
       </div>
     </div>
 

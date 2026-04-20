@@ -11,16 +11,19 @@ body {
 	font-family: Georgia, 'Times New Roman', Times, serif;
 	background: #08101d;
 	color: #f9d56e;
+	overflow: hidden;
 }
 
 body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	background: radial-gradient(circle at top, #2b324f 0%, #09111e 40%, #04080f 100%);
 }
 
 .stage {
-	width: 800px;
-	margin: 36px auto;
 	position: relative;
+	display: inline-block;
 }
 
 canvas {
@@ -31,7 +34,45 @@ canvas {
 	border-radius: 24px;
 }
 
-/* Menu overlay (inset to match canvas border) */
+/* ================= HUD ================= */
+.hud {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+	display: flex;
+	gap: 10px;
+	z-index: 25;
+}
+
+.hud-btn {
+	padding: 8px 18px;
+	border-radius: 12px;
+	border: 2px solid #f9d56e;
+	background: rgba(15, 26, 47, 0.8);
+	color: #f9d56e;
+	cursor: pointer;
+	font-weight: bold;
+	backdrop-filter: blur(4px);
+	transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.hud-btn:hover {
+	background: #f9d56e;
+	color: #0f1a2f;
+	transform: translateY(-2px);
+}
+
+.hud-btn.exit {
+	border-color: #d44c31;
+	color: #f0e7ba;
+}
+
+.hud-btn.exit:hover {
+	background: #d44c31;
+	color: #fff;
+}
+
+/* ================= MENU ================= */
 .menu {
 	position: absolute;
 	left: 6px;
@@ -43,18 +84,21 @@ canvas {
 	justify-content: center;
 	padding: 24px;
 	background: radial-gradient(circle at center, rgba(255,255,255,0.06), rgba(0,0,0,0.75));
+	z-index: 20;
+	border-radius: 18px;
 }
 
 .menu-card {
 	width: 100%;
 	max-width: 640px;
 	padding: 32px 28px;
-	background: rgba(18,22,36,0.95);
-	border: 2px solid rgba(255,215,0,0.3);
+	background: rgba(18, 22, 36, 0.95);
+	border: 2px solid rgba(255, 215, 0, 0.3);
 	border-radius: 24px;
 	box-shadow: 0 0 40px rgba(255, 215, 0, 0.12);
 	position: relative;
 	overflow: hidden;
+	text-align: center;
 }
 
 .menu-card::before {
@@ -70,14 +114,14 @@ canvas {
 .logo {
 	font-size: 4rem;
 	margin-bottom: 0.4rem;
-	text-shadow: 0 0 18px rgba(255,215,0,0.6);
+	text-shadow: 0 0 18px rgba(255, 215, 0, 0.6);
 }
 
 .title {
 	font-size: 4rem;
 	margin: 0 0 12px 0;
 	color: #f7cf5a;
-	text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+	text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
 	letter-spacing: 2px;
 }
 
@@ -87,34 +131,7 @@ canvas {
 	font-size: 1.1rem;
 	line-height: 1.8;
 	color: #f0e7ba;
-	text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
-}
-
-.asset-row {
-	display: flex;
-	justify-content: center;
-	gap: 16px;
-	margin: 0 auto 18px auto;
-}
-
-.asset-row img {
-	width: 110px;
-	height: auto;
-	border: 3px solid rgba(255,215,0,0.28);
-	border-radius: 18px;
-	background: rgba(10,12,20,0.9);
-	padding: 10px;
-	box-shadow: 0 14px 32px rgba(0,0,0,0.35);
-	transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.asset-row img:hover {
-	transform: translateY(-4px) scale(1.02);
-	box-shadow: 0 18px 36px rgba(255,215,0,0.2);
-}
-
-.asset-row.pigs img {
-	width: 90px;
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 .buttons {
@@ -137,13 +154,14 @@ button {
 #startBtn {
 	background: #d44c31;
 	color: #fff;
-	box-shadow: 0 12px 22px rgba(212,76,49,0.3);
+	box-shadow: 0 12px 22px rgba(212, 76, 49, 0.3);
 }
 
-#instructionsBtn {
-	background: rgba(255,215,0,0.12);
+#instructionsBtn,
+#levelsBtn {
+	background: rgba(255, 215, 0, 0.12);
 	color: #f9d56e;
-	box-shadow: 0 10px 18px rgba(255,215,0,0.2);
+	box-shadow: 0 10px 18px rgba(255, 215, 0, 0.2);
 }
 
 button:hover {
@@ -154,8 +172,9 @@ button:hover {
 	background: #f06842;
 }
 
-#instructionsBtn:hover {
-	background: rgba(255,215,0,0.22);
+#instructionsBtn:hover,
+#levelsBtn:hover {
+	background: rgba(255, 215, 0, 0.22);
 }
 
 .callout {
@@ -172,16 +191,16 @@ button:hover {
 	font-size: 1.2rem;
 }
 
+/* ================= MODALS ================= */
 .modal {
 	position: absolute;
-	left: 0;
-	right: 0;
-	top: 0;
-	bottom: 0;
+	inset: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: rgba(0,0,0,0.72);
+	background: rgba(0, 0, 0, 0.72);
+	z-index: 30;
+	border-radius: 24px;
 }
 
 .modal-content {
@@ -189,8 +208,10 @@ button:hover {
 	padding: 26px 24px;
 	border-radius: 18px;
 	max-width: 520px;
-	border: 2px solid rgba(255,215,0,0.25);
-	box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+	width: 90%;
+	border: 2px solid rgba(255, 215, 0, 0.25);
+	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+	text-align: center;
 }
 
 .modal-content h2 {
@@ -206,22 +227,47 @@ button:hover {
 }
 
 .modal-content button {
-	width: 100%;
 	margin-top: 10px;
 	background: #d44c31;
 	color: #fff;
-	box-shadow: 0 8px 18px rgba(212,76,49,0.3);
+	box-shadow: 0 8px 18px rgba(212, 76, 49, 0.3);
 }
 
+/* ================= LEVEL GRID ================= */
+#levelGrid {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 10px;
+	margin: 20px 0;
+}
+
+#levelGrid button {
+	width: 100%;
+	background: rgba(255, 215, 0, 0.1);
+	color: #f9d56e;
+	border: 1px solid #f9d56e;
+	box-shadow: none;
+}
+
+#levelGrid button:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+	transform: none;
+}
+
+/* ================= UTIL ================= */
 .hidden {
-	display: none;
+	display: none !important;
 }
 
 @media (max-width: 900px) {
 	.stage {
-		margin: 18px auto;
 		width: auto;
-		padding: 0 12px;
+		max-width: 100%;
+	}
+
+	canvas {
+		max-width: 100%;
+		height: auto;
 	}
 }
-
