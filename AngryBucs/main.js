@@ -78,7 +78,7 @@ function startLevel(num) {
 
 // ================= PHYSICS / COLLISIONS =================
 
-const GROUND_Y = canvas.height - 90;
+const GROUND_Y = canvas.height - 120;
 const DAMAGE_THRESHOLD = 100;
 
 function resolveGroundCollisions(entities) {
