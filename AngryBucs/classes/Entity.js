@@ -6,6 +6,7 @@ export class Entity {
     this.health = health;
     this.physical = new Physical();
     this.position = new Vector2(x, y);
+
     this.image = image;
     this.size = new Vector2(width, height);
     this.rotation = 0;

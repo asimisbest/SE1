@@ -33,9 +33,9 @@ export class Level1 extends Level {
       ],
 
       pigs: [
-        { type: BasicPig, x: 610, y: 380 },
-        { type: BasicPig, x: 750, y: 380 },
-        { type: BasicPig, x: 680, y: 365 },
+        { type: BasicPig, x: 610, y: 175 },
+        { type: BasicPig, x: 750, y: 175 },
+        { type: BasicPig, x: 680, y: 175 },
       ],
     });
   }
