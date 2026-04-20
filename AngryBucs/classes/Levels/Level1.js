@@ -1,14 +1,15 @@
 import { Level } from "./../Level.js";
-import { WoodBlock } from "./../Blocks/WoodBlock.js";
+import { Cannon } from "./../Cannon.js";
+import { WoodBlock } from "./../Blocks/Wood.js";
 import { BasicPig } from "./../Pigs/BasicPig.js";
-import { Buc } from "./Buc.js";
+import { Buc } from "./../Buc.js";
 import { FastBuc } from "./../Bucs/FastBuc.js";
 
 export class Level1 extends Level {
   constructor() {
     super({
       ground: 500,
-      slingshot: { x: 120, y: 460 },
+      cannon: new Cannon({ x: 80, y: 305 }),
 
       bucs: [
         { type: Buc },

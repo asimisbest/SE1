@@ -1,3 +1,5 @@
+import { Level1 } from './classes/Levels/Level1.js';
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -21,6 +23,7 @@ let running = false;
 let currentLevel = 1;
 let unlockedLevel = 1;
 let waveOffset = 0;
+let level = null;
 
 let aimX = 140;
 let aimY = canvas.height - 160;
@@ -116,8 +119,10 @@ function createLevels() {
     }
 }
 
-function startLevel(level) {
-    currentLevel = level;
+function startLevel(num) {
+    currentLevel = num;
+    level = new Level1();
+    level.build();
     menu.style.display = 'none';
     levelsPage.classList.add('hidden');
     gameHUD.classList.remove('hidden');
@@ -169,6 +174,7 @@ function drawBackground() {
     ctx.fillRect(0, canvas.height - 95, canvas.width, 8);
 }
 
+<<<<<<< HEAD
 function drawCannon() {
   const bx = 80;
   const by = canvas.height - 95;
@@ -247,6 +253,8 @@ function drawTrajectoryPreview() {
   }
 }
 
+=======
+>>>>>>> origin/Sprint-3
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
@@ -257,10 +265,15 @@ function render() {
         ctx.lineWidth = 4;
         ctx.strokeText(`Level ${currentLevel}`, 16, 40);
         ctx.fillStyle = '#f9d56e';
+<<<<<<< HEAD
         ctx.font = 'bold 24px Georgia';
         ctx.fillText(`Level ${currentLevel}`, 20, 40);
         drawCannon();
         drawTrajectoryPreview();
+=======
+        ctx.fillText(`Level ${currentLevel}`, 16, 40);
+        if (level) level.cannon.draw(ctx);
+>>>>>>> origin/Sprint-3
     }
 }
 
