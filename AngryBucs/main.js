@@ -1,3 +1,5 @@
+import { Level1 } from './classes/Levels/Level1.js';
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -21,6 +23,7 @@ let running = false;
 let currentLevel = 1;
 let unlockedLevel = 1;
 let waveOffset = 0;
+let level = null;
 
 // ================= NAVIGATION =================
 
@@ -54,8 +57,10 @@ function createLevels() {
     }
 }
 
-function startLevel(level) {
-    currentLevel = level;
+function startLevel(num) {
+    currentLevel = num;
+    level = new Level1();
+    level.build();
     menu.style.display = 'none';
     levelsPage.classList.add('hidden');
     gameHUD.classList.remove('hidden');
@@ -107,23 +112,6 @@ function drawBackground() {
     ctx.fillRect(0, canvas.height - 95, canvas.width, 8);
 }
 
-function drawCannon() {
-    const bx = 80, by = canvas.height - 95;
-    // Wheels
-    ctx.fillStyle = '#3b2508';
-    ctx.beginPath();
-    ctx.arc(bx-10, by+2, 12, 0, Math.PI*2);
-    ctx.arc(bx+12, by+2, 12, 0, Math.PI*2);
-    ctx.fill();
-    // Barrel
-    ctx.save();
-    ctx.translate(bx, by-8);
-    ctx.rotate(-Math.PI/6);
-    ctx.fillStyle = '#2a2a2a';
-    ctx.fillRect(-10, -10, 50, 20);
-    ctx.restore();
-}
-
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
@@ -135,7 +123,7 @@ function render() {
         ctx.strokeText(`Level ${currentLevel}`, 16, 40);
         ctx.fillStyle = '#f9d56e';
         ctx.fillText(`Level ${currentLevel}`, 16, 40);
-        drawCannon();
+        if (level) level.cannon.draw(ctx);
     }
 }
 
