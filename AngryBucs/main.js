@@ -60,6 +60,8 @@ canvas.addEventListener('mousemove', (e) => {
   const pos = getMousePos(e);
   aimX = pos.x;
   aimY = pos.y;
+
+  updateCannonAngle(); // ✅ ADD THIS
 });
 
 canvas.addEventListener('mouseleave', () => {
@@ -87,6 +89,9 @@ canvas.addEventListener('touchstart', (e) => {
   const pos = getMousePos(touch);
   aimX = pos.x;
   aimY = pos.y;
+
+  updateCannonAngle(); // ✅ ADD HERE TOO
+
   isAiming = true;
 
   e.preventDefault();
@@ -99,6 +104,8 @@ canvas.addEventListener('touchmove', (e) => {
   const pos = getMousePos(touch);
   aimX = pos.x;
   aimY = pos.y;
+
+  updateCannonAngle(); // ✅ ADD THIS
 
   e.preventDefault();
 }, { passive: false });
@@ -174,34 +181,20 @@ function drawBackground() {
     ctx.fillRect(0, canvas.height - 95, canvas.width, 8);
 }
 
-<<<<<<< HEAD
-function drawCannon() {
-  const bx = 80;
-  const by = canvas.height - 95;
+function updateCannonAngle() {
+  if (!level || !level.cannon) return;
 
-  const dx = aimX - bx;
-  const dy = aimY - (by - 8);
+  const cannon = level.cannon;
+
+  const dx = aimX - cannon.x;
+  const dy = aimY - (cannon.y - 8);
+
   let angle = Math.atan2(dy, dx);
 
-  // optional clamp so the cannon does not point backwards/down too much
   const minAngle = -Math.PI * 0.85;
   const maxAngle = -Math.PI * 0.1;
-  angle = Math.max(minAngle, Math.min(maxAngle, angle));
 
-  // Wheels
-  ctx.fillStyle = '#3b2508';
-  ctx.beginPath();
-  ctx.arc(bx - 10, by + 2, 12, 0, Math.PI * 2);
-  ctx.arc(bx + 12, by + 2, 12, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Barrel
-  ctx.save();
-  ctx.translate(bx, by - 8);
-  ctx.rotate(angle);
-  ctx.fillStyle = '#2a2a2a';
-  ctx.fillRect(-10, -10, 50, 20);
-  ctx.restore();
+  cannon.angle = Math.max(minAngle, Math.min(maxAngle, angle));
 }
 
 function getMousePos(evt) {
@@ -216,28 +209,20 @@ function getMousePos(evt) {
 }
 
 function drawTrajectoryPreview() {
-  if (!running || !isAiming) return;
+  if (!running || !isAiming || !level || !level.cannon) return;
 
-  const cannonX = 80;
-  const cannonY = canvas.height - 103; // close to barrel pivot
+  const cannon = level.cannon;
+  const angle = cannon.angle;
 
-  let dx = aimX - cannonX;
-  let dy = aimY - cannonY;
-  let angle = Math.atan2(dy, dx);
-
-  const minAngle = -Math.PI * 0.85;
-  const maxAngle = -Math.PI * 0.1;
-  angle = Math.max(minAngle, Math.min(maxAngle, angle));
-
+  const dx = aimX - cannon.x;
+  const dy = aimY - cannon.y;
   const distance = Math.hypot(dx, dy);
   const power = Math.min(distance * 3, maxPower);
 
   const vx = Math.cos(angle) * power;
   const vy = Math.sin(angle) * power;
 
-  // barrel tip position
-  const startX = cannonX + Math.cos(angle) * 40;
-  const startY = cannonY + Math.sin(angle) * 40;
+  const { x: startX, y: startY } = cannon.getBarrelTip();
 
   ctx.fillStyle = 'rgba(255, 230, 120, 0.85)';
 
@@ -253,28 +238,25 @@ function drawTrajectoryPreview() {
   }
 }
 
-=======
->>>>>>> origin/Sprint-3
 function render() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBackground();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBackground();
 
-    if (running) {
-        ctx.font = 'bold 28px Georgia, serif';
-        ctx.strokeStyle = '#7a3e00';
-        ctx.lineWidth = 4;
-        ctx.strokeText(`Level ${currentLevel}`, 16, 40);
-        ctx.fillStyle = '#f9d56e';
-<<<<<<< HEAD
-        ctx.font = 'bold 24px Georgia';
-        ctx.fillText(`Level ${currentLevel}`, 20, 40);
-        drawCannon();
-        drawTrajectoryPreview();
-=======
-        ctx.fillText(`Level ${currentLevel}`, 16, 40);
-        if (level) level.cannon.draw(ctx);
->>>>>>> origin/Sprint-3
+  if (running) {
+    ctx.font = 'bold 28px Georgia, serif';
+    ctx.strokeStyle = '#7a3e00';
+    ctx.lineWidth = 4;
+    ctx.strokeText(`Level ${currentLevel}`, 16, 40);
+
+    ctx.fillStyle = '#f9d56e';
+    ctx.font = 'bold 24px Georgia';
+    ctx.fillText(`Level ${currentLevel}`, 20, 40);
+
+    if (level) {
+      level.cannon.draw(ctx);
+      drawTrajectoryPreview();
     }
+  }
 }
 
 function loop() {
