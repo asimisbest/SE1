@@ -1,4 +1,5 @@
 import { Level1 } from './classes/Levels/Level1.js';
+import { Vector2 } from './classes/Vector2.js';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -35,8 +36,8 @@ let aimX = 140;
 let aimY = canvas.height - 160;
 let isAiming = false;
 
-const gravity = 900; // pixels/sec^2
-const maxPower = 1000;
+const gravity = 980; // pixels/sec^2 — must match Entity.js
+const maxPower = 1200;
 
 // ================= NAVIGATION =================
 
@@ -84,7 +85,7 @@ canvas.addEventListener('mousedown', (e) => {
 });
 
 canvas.addEventListener('mouseup', () => {
-  isAiming = false;
+  shootCannon();
 });
 
 
@@ -118,7 +119,7 @@ canvas.addEventListener('touchmove', (e) => {
 }, { passive: false });
 
 canvas.addEventListener('touchend', () => {
-  isAiming = false;
+  shootCannon();
 });
 
 
@@ -298,6 +299,33 @@ function updateCannonAngle() {
   cannon.angle = Math.max(minAngle, Math.min(maxAngle, angle));
 }
 
+function shootCannon() {
+  if (!running || !isAiming || !level || !level.cannon) {
+    isAiming = false;
+    return;
+  }
+  
+  const cannon = level.cannon;
+  const buc = level.getCurrentBuc();
+  if (buc && !buc.hasBeenShot) {
+    const dx = aimX - cannon.x;
+    const dy = aimY - cannon.y;
+    const distance = Math.hypot(dx, dy);
+    const power = Math.min(distance * 5, maxPower);
+
+    const vx = Math.cos(cannon.angle) * power * cannon.velocityMultiplier;
+    const vy = Math.sin(cannon.angle) * power * cannon.velocityMultiplier;
+
+    const { x, y } = cannon.getBarrelTip();
+    buc.position.x = x;
+    buc.position.y = y;
+    
+    buc.launch(new Vector2(vx, vy));
+    level.nextBuc();
+  }
+  isAiming = false;
+}
+
 function getMousePos(evt) {
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
@@ -354,6 +382,67 @@ function render() {
     if (level) {
       level.draw(ctx);
       level.cannon.draw(ctx);
+
+      // Draw queued bucs as ammo indicators near cannon
+      const cannon = level.cannon;
+      for (let i = level.currentBucIndex; i < level.bucs.length; i++) {
+        const offset = i - level.currentBucIndex;
+        if (offset === 0) {
+          // Current buc: draw at barrel tip
+          const tip = cannon.getBarrelTip();
+          ctx.save();
+          ctx.translate(tip.x, tip.y);
+          ctx.beginPath();
+          ctx.arc(0, 0, 8, 0, Math.PI * 2);
+          const grad = ctx.createRadialGradient(-1, -1, 1, 0, 0, 8);
+          grad.addColorStop(0, "#0a2d5c");
+          grad.addColorStop(1, "#041e42");
+          ctx.fillStyle = grad;
+          ctx.fill();
+          ctx.strokeStyle = "#ffc72c";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.fillStyle = "#ffc72c";
+          ctx.font = "bold 5px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("B", 0, 0);
+          ctx.restore();
+        } else {
+          // Queued bucs: small icons below cannon
+          const qx = cannon.x - 20 + (offset - 1) * 22;
+          const qy = cannon.y + 20;
+          ctx.save();
+          ctx.translate(qx, qy);
+          ctx.beginPath();
+          ctx.arc(0, 0, 8, 0, Math.PI * 2);
+          ctx.fillStyle = "#041e42";
+          ctx.fill();
+          ctx.strokeStyle = "#ffc72c";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.fillStyle = "#ffc72c";
+          ctx.font = "bold 6px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText((offset).toString(), 0, 0);
+          ctx.restore();
+        }
+      }
+
+      // Show remaining Bucs count
+      ctx.save();
+      ctx.fillStyle = "#ffc72c";
+      ctx.strokeStyle = "#041e42";
+      ctx.lineWidth = 3;
+      ctx.font = "bold 16px Arial, sans-serif";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      const remaining = level.bucs.length - level.currentBucIndex;
+      ctx.strokeText(`Bucs: ${remaining}`, 16, 54);
+      ctx.fillText(`Bucs: ${remaining}`, 16, 54);
+      ctx.restore();
+
       drawTrajectoryPreview();
     }
   }

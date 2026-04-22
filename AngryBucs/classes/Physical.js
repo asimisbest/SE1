@@ -6,7 +6,7 @@ export class Physical {
     this.forces = new Vector2(0, 0);
     this.mass = 1;
     this.restitution = 0.3;
-    this.friction = 0.98;
+    this.friction = 1.0;
   }
 
   applyForce(force) {
@@ -16,7 +16,9 @@ export class Physical {
   calculatePosition(currentPosition, dt) {
     const acceleration = this.forces.scale(1 / this.mass);
     this.velocity = this.velocity.add(acceleration.scale(dt));
-    this.velocity = this.velocity.scale(this.friction);
+    // Framerate-independent drag: only apply light air resistance
+    const dragFactor = Math.pow(this.friction, dt);
+    this.velocity = this.velocity.scale(dragFactor);
     const newPosition = currentPosition.add(this.velocity.scale(dt));
     this.forces = new Vector2(0, 0);
     return newPosition;
