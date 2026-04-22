@@ -203,6 +203,9 @@ function resolveAABB(a, b) {
                 if (!stat.isStatic) {
                     dyn.physical.velocity.x = vx * (mDyn - e * mStat) / total;
                     stat.physical.velocity.x = vx * (1 + e) * mDyn / total;
+                    const halfH = Math.max(1, stat.size.y / 2);
+                    const yOff = Math.max(-1, Math.min(1, (dyn.position.y - stat.position.y) / halfH));
+                    stat.physical.angularVelocity = vx * yOff * 0.015;
                 } else {
                     dyn.physical.velocity.x = -vx * e;
                 }
@@ -239,6 +242,9 @@ function resolveAABB(a, b) {
                     dyn.physical.velocity.y = vy * (mDyn - e * mStat) / total;
                     stat.physical.velocity.y = vy * (1 + e) * mDyn / total;
                     dyn.physical.velocity.x *= 0.85;
+                    const halfW = Math.max(1, stat.size.x / 2);
+                    const xOff = Math.max(-1, Math.min(1, (dyn.position.x - stat.position.x) / halfW));
+                    stat.physical.angularVelocity = vy * xOff * 0.015;
                 } else {
                     dyn.physical.velocity.y = -vy * e;
                     dyn.physical.velocity.x *= 0.85;

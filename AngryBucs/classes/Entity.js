@@ -18,7 +18,7 @@ export class Entity {
     if (this.isStatic) return;
     this.physical.calculateForces(980, dt);
     this.position = this.physical.calculatePosition(this.position, dt);
-    this.rotation = this.physical.calculateRotation(dt);
+    this.rotation = this.physical.calculateRotation(this.rotation, dt);
   }
 
   takeDamage(amount) {

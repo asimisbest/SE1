@@ -7,6 +7,7 @@ export class Physical {
     this.mass = 1;
     this.restitution = 0.3;
     this.friction = 1.0;
+    this.angularVelocity = 0;
   }
 
   applyForce(force) {
@@ -29,11 +30,15 @@ export class Physical {
     return this.forces.magnitude();
   }
 
-  calculateRotation(dt) {
+  calculateRotation(currentRotation, dt) {
+    if (Math.abs(this.angularVelocity) > 0.001) {
+      this.angularVelocity *= Math.pow(0.2, dt);
+      return currentRotation + this.angularVelocity * dt;
+    }
     if (this.velocity.magnitude() > 0.5) {
       return Math.atan2(this.velocity.y, this.velocity.x);
     }
-    return 0;
+    return currentRotation;
   }
 
   calculateProperties(canvasPos, canvasBody, addForces) {
