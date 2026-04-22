@@ -190,11 +190,24 @@ function resolveAABB(a, b) {
         } else {
             const dyn = a.isStatic ? b : a;
             const stat = a.isStatic ? a : b;
+            const mDyn = dyn.physical.mass, mStat = stat.physical.mass;
+            const total = mDyn + mStat;
             if (dyn.position.x < stat.position.x) dyn.position.x -= overlapX;
             else dyn.position.x += overlapX;
-            const impact = Math.abs(dyn.physical.velocity.x);
-            dyn.physical.velocity.x = -dyn.physical.velocity.x * e;
-            if (impact > DAMAGE_THRESHOLD) { const dmg = impact * 0.1; dyn.takeDamage(dmg); stat.takeDamage(dmg); }
+            const vx = dyn.physical.velocity.x;
+            const impact = Math.abs(vx);
+            if (impact > DAMAGE_THRESHOLD) {
+                dyn.takeDamage(impact * 0.1);
+                stat.takeDamage(impact * 0.1);
+                if (!stat.isStatic) {
+                    dyn.physical.velocity.x = vx * (mDyn - e * mStat) / total;
+                    stat.physical.velocity.x = vx * (1 + e) * mDyn / total;
+                } else {
+                    dyn.physical.velocity.x = -vx * e;
+                }
+            } else {
+                dyn.physical.velocity.x = -vx * e;
+            }
         }
     } else {
         if (!a.isStatic && !b.isStatic) {
@@ -212,12 +225,27 @@ function resolveAABB(a, b) {
         } else {
             const dyn = a.isStatic ? b : a;
             const stat = a.isStatic ? a : b;
+            const mDyn = dyn.physical.mass, mStat = stat.physical.mass;
+            const total = mDyn + mStat;
             if (dyn.position.y < stat.position.y) dyn.position.y -= overlapY;
             else dyn.position.y += overlapY;
-            const impact = Math.abs(dyn.physical.velocity.y);
-            dyn.physical.velocity.y = -dyn.physical.velocity.y * e;
-            dyn.physical.velocity.x *= 0.85;
-            if (impact > DAMAGE_THRESHOLD) { const dmg = impact * 0.1; dyn.takeDamage(dmg); stat.takeDamage(dmg); }
+            const vy = dyn.physical.velocity.y;
+            const impact = Math.abs(vy);
+            if (impact > DAMAGE_THRESHOLD) {
+                dyn.takeDamage(impact * 0.1);
+                stat.takeDamage(impact * 0.1);
+                if (!stat.isStatic) {
+                    dyn.physical.velocity.y = vy * (mDyn - e * mStat) / total;
+                    stat.physical.velocity.y = vy * (1 + e) * mDyn / total;
+                    dyn.physical.velocity.x *= 0.85;
+                } else {
+                    dyn.physical.velocity.y = -vy * e;
+                    dyn.physical.velocity.x *= 0.85;
+                }
+            } else {
+                dyn.physical.velocity.y = -vy * e;
+                dyn.physical.velocity.x *= 0.85;
+            }
         }
     }
 }

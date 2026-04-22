@@ -14,6 +14,11 @@ export class Block extends Entity {
     this.isStatic = true;
   }
 
+  takeDamage(amount) {
+    this.isStatic = false;
+    super.takeDamage(amount);
+  }
+
   get materialColor() {
     switch (this.material) {
       case "wood":
