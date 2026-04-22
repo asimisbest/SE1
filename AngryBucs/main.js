@@ -36,7 +36,7 @@ let aimY = canvas.height - 160;
 let isAiming = false;
 
 const gravity = 900; // pixels/sec^2
-const maxPower = 650;
+const maxPower = 1000;
 
 // ================= NAVIGATION =================
 
@@ -294,7 +294,7 @@ function drawTrajectoryPreview() {
   const dx = aimX - cannon.x;
   const dy = aimY - cannon.y;
   const distance = Math.hypot(dx, dy);
-  const power = Math.min(distance * 3, maxPower);
+  const power = Math.min(distance * 5, maxPower);
 
   const vx = Math.cos(angle) * power * cannon.velocityMultiplier;
   const vy = Math.sin(angle) * power * cannon.velocityMultiplier;
