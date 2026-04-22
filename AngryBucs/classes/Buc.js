@@ -36,19 +36,6 @@ export class Buc extends Entity {
     ctx.save();
     ctx.translate(this.position.x, this.position.y);
 
-    // --- "BUCKY" label above (doesn't rotate) ---
-    ctx.save();
-    ctx.fillStyle = "#ffc72c";
-    ctx.strokeStyle = "#041e42";
-    ctx.lineWidth = 3;
-    ctx.font = `bold ${Math.round(r * 0.55)}px Arial, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "bottom";
-    ctx.strokeText("BUCKY", 0, -r - r * 0.8);
-    ctx.fillText("BUCKY", 0, -r - r * 0.8);
-    ctx.restore();
-
-    ctx.rotate(this.rotation);
 
     // Determine colors
     const isYellowBody = this._bodyColor === "#facc15";
