@@ -11,6 +11,7 @@ export class Block extends Entity {
     this.material = options.material || "wood";
     this.physical.mass = options.material === "stone" ? 8 : options.material === "ice" ? 2 : 4;
     this.physical.restitution = 0.1;
+    this.isStatic = true;
   }
 
   get materialColor() {

@@ -147,11 +147,12 @@ function startLevel(num) {
 
 // ================= PHYSICS / COLLISIONS =================
 
-const GROUND_Y = canvas.height - 120;
+const GROUND_Y = canvas.height - 90;
 const DAMAGE_THRESHOLD = 100;
 
 function resolveGroundCollisions(entities) {
     for (const e of entities) {
+        if (e.isStatic) continue;
         const b = e.getBounds();
         if (b.bottom >= GROUND_Y) {
             e.position.y -= b.bottom - GROUND_Y;
@@ -168,33 +169,56 @@ function resolveAABB(a, b) {
     const overlapX = Math.min(ba.right, bb.right) - Math.max(ba.left, bb.left);
     const overlapY = Math.min(ba.bottom, bb.bottom) - Math.max(ba.top, bb.top);
     if (overlapX <= 0 || overlapY <= 0) return;
+    if (a.isStatic && b.isStatic) return;
 
     const mA = a.physical.mass, mB = b.physical.mass;
-    const total = mA + mB;
     const e = (a.physical.restitution + b.physical.restitution) / 2;
 
     if (overlapX < overlapY) {
-        const pushA = (overlapX * mB) / total;
-        const pushB = (overlapX * mA) / total;
-        if (a.position.x < b.position.x) { a.position.x -= pushA; b.position.x += pushB; }
-        else                              { a.position.x += pushA; b.position.x -= pushB; }
-        const relVx = a.physical.velocity.x - b.physical.velocity.x;
-        const impulse = -(1 + e) * relVx * mA * mB / total;
-        a.physical.velocity.x += impulse / mA;
-        b.physical.velocity.x -= impulse / mB;
-        const impact = Math.abs(relVx);
-        if (impact > DAMAGE_THRESHOLD) { const dmg = impact * 0.1; a.takeDamage(dmg); b.takeDamage(dmg); }
+        if (!a.isStatic && !b.isStatic) {
+            const total = mA + mB;
+            const pushA = (overlapX * mB) / total;
+            const pushB = (overlapX * mA) / total;
+            if (a.position.x < b.position.x) { a.position.x -= pushA; b.position.x += pushB; }
+            else                              { a.position.x += pushA; b.position.x -= pushB; }
+            const relVx = a.physical.velocity.x - b.physical.velocity.x;
+            const impulse = -(1 + e) * relVx * mA * mB / total;
+            a.physical.velocity.x += impulse / mA;
+            b.physical.velocity.x -= impulse / mB;
+            const impact = Math.abs(relVx);
+            if (impact > DAMAGE_THRESHOLD) { const dmg = impact * 0.1; a.takeDamage(dmg); b.takeDamage(dmg); }
+        } else {
+            const dyn = a.isStatic ? b : a;
+            const stat = a.isStatic ? a : b;
+            if (dyn.position.x < stat.position.x) dyn.position.x -= overlapX;
+            else dyn.position.x += overlapX;
+            const impact = Math.abs(dyn.physical.velocity.x);
+            dyn.physical.velocity.x = -dyn.physical.velocity.x * e;
+            if (impact > DAMAGE_THRESHOLD) { const dmg = impact * 0.1; dyn.takeDamage(dmg); stat.takeDamage(dmg); }
+        }
     } else {
-        const pushA = (overlapY * mB) / total;
-        const pushB = (overlapY * mA) / total;
-        if (a.position.y < b.position.y) { a.position.y -= pushA; b.position.y += pushB; }
-        else                              { a.position.y += pushA; b.position.y -= pushB; }
-        const relVy = a.physical.velocity.y - b.physical.velocity.y;
-        const impulse = -(1 + e) * relVy * mA * mB / total;
-        a.physical.velocity.y += impulse / mA;
-        b.physical.velocity.y -= impulse / mB;
-        const impact = Math.abs(relVy);
-        if (impact > DAMAGE_THRESHOLD) { const dmg = impact * 0.1; a.takeDamage(dmg); b.takeDamage(dmg); }
+        if (!a.isStatic && !b.isStatic) {
+            const total = mA + mB;
+            const pushA = (overlapY * mB) / total;
+            const pushB = (overlapY * mA) / total;
+            if (a.position.y < b.position.y) { a.position.y -= pushA; b.position.y += pushB; }
+            else                              { a.position.y += pushA; b.position.y -= pushB; }
+            const relVy = a.physical.velocity.y - b.physical.velocity.y;
+            const impulse = -(1 + e) * relVy * mA * mB / total;
+            a.physical.velocity.y += impulse / mA;
+            b.physical.velocity.y -= impulse / mB;
+            const impact = Math.abs(relVy);
+            if (impact > DAMAGE_THRESHOLD) { const dmg = impact * 0.1; a.takeDamage(dmg); b.takeDamage(dmg); }
+        } else {
+            const dyn = a.isStatic ? b : a;
+            const stat = a.isStatic ? a : b;
+            if (dyn.position.y < stat.position.y) dyn.position.y -= overlapY;
+            else dyn.position.y += overlapY;
+            const impact = Math.abs(dyn.physical.velocity.y);
+            dyn.physical.velocity.y = -dyn.physical.velocity.y * e;
+            dyn.physical.velocity.x *= 0.85;
+            if (impact > DAMAGE_THRESHOLD) { const dmg = impact * 0.1; dyn.takeDamage(dmg); stat.takeDamage(dmg); }
+        }
     }
 }
 

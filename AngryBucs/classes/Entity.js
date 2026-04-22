@@ -11,9 +11,11 @@ export class Entity {
     this.size = new Vector2(width, height);
     this.rotation = 0;
     this.alive = true;
+    this.isStatic = false;
   }
 
   update(dt) {
+    if (this.isStatic) return;
     this.physical.calculateForces(980, dt);
     this.position = this.physical.calculatePosition(this.position, dt);
     this.rotation = this.physical.calculateRotation(dt);
