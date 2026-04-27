@@ -6,7 +6,8 @@ export class Physical {
     this.forces = new Vector2(0, 0);
     this.mass = 1;
     this.restitution = 0.3;
-    this.friction = 0.98;
+    this.friction = 1.0;
+    this.angularVelocity = 0;
   }
 
   applyForce(force) {
@@ -16,7 +17,9 @@ export class Physical {
   calculatePosition(currentPosition, dt) {
     const acceleration = this.forces.scale(1 / this.mass);
     this.velocity = this.velocity.add(acceleration.scale(dt));
-    this.velocity = this.velocity.scale(this.friction);
+    // Framerate-independent drag: only apply light air resistance
+    const dragFactor = Math.pow(this.friction, dt);
+    this.velocity = this.velocity.scale(dragFactor);
     const newPosition = currentPosition.add(this.velocity.scale(dt));
     this.forces = new Vector2(0, 0);
     return newPosition;
@@ -27,11 +30,15 @@ export class Physical {
     return this.forces.magnitude();
   }
 
-  calculateRotation(dt) {
+  calculateRotation(currentRotation, dt) {
+    if (Math.abs(this.angularVelocity) > 0.001) {
+      this.angularVelocity *= Math.pow(0.2, dt);
+      return currentRotation + this.angularVelocity * dt;
+    }
     if (this.velocity.magnitude() > 0.5) {
       return Math.atan2(this.velocity.y, this.velocity.x);
     }
-    return 0;
+    return currentRotation;
   }
 
   calculateProperties(canvasPos, canvasBody, addForces) {
