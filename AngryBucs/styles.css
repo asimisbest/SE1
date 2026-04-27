@@ -4,7 +4,7 @@
 }
 
 body {
-	height: 100vh;
+	height: 100%;
 	margin: 0;
 	display: flex;
 	justify-content: center;
@@ -73,7 +73,7 @@ canvas {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: #041737;
+	background: #04080f;
 	z-index: 20;
 	border-radius: 24px;
 }

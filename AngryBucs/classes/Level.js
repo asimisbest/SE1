@@ -1,10 +1,10 @@
 export class Level {
-  constructor({ blocks = [], pigs = [], bucs = [], ground = 500, cannon = null } = {}) {
-    this.blockDefs = blocks;
-    this.pigDefs = pigs;
-    this.bucDefs = bucs;
+  constructor({ blocks = [], pigs = [], bucs = [], ground = 500, slingshot = { x: 120, y: 0 } } = {}) {
+    this.blockDefs = blocks;    // [{ type: BlockClass, x, y, rotation?, ...opts }]
+    this.pigDefs = pigs;        // [{ type: PigClass, x, y, ...opts }]
+    this.bucDefs = bucs;        // [{ type: BucClass, ...opts }] — order = launch order
     this.ground = ground;
-    this.cannon = cannon;
+    this.slingshot = slingshot;
 
     this.blocks = [];
     this.pigs = [];
@@ -65,11 +65,8 @@ export class Level {
   }
 
   draw(ctx) {
-    if (this.cannon) this.cannon.draw(ctx);
     for (const block of this.blocks) block.draw(ctx);
     for (const pig of this.pigs) pig.draw(ctx);
-    for (const buc of this.bucs) {
-    if (buc.hasBeenShot) buc.draw(ctx);
-}
+    for (const buc of this.bucs) buc.draw(ctx);
   }
 }
