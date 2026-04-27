@@ -7,7 +7,7 @@ export class WoodBlock extends Block {
       health: 60,
       ...options,
     });
-    this.physical.mass = 4;
+    this.physical.mass = 3;
     this.physical.restitution = 0.15;
   }
 }

@@ -16,6 +16,7 @@ export class Entity {
 
   update(dt) {
     if (this.isStatic) return;
+    if (this.physical.isSleeping) return;
     this.physical.calculateForces(980, dt);
     this.position = this.physical.calculatePosition(this.position, dt);
     this.rotation = this.physical.calculateRotation(this.rotation, dt);

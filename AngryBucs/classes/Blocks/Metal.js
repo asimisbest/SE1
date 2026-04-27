@@ -7,7 +7,7 @@ export class MetalBlock extends Block {
       health: 120,
       ...options,
     });
-    this.physical.mass = 8;
+    this.physical.mass = 10;
     this.physical.restitution = 0.075;
   }
 }
