@@ -9,8 +9,12 @@ export class Level {
     this.blocks = [];
     this.pigs = [];
     this.bucs = [];
+    this.extraProjectiles = []; // for split fragments
     this.currentBucIndex = 0;
     this.built = false;
+    this.score = 0;
+    this._scoredPigs = new Set();
+    this._scoredBlocks = new Set();
   }
 
   build() {
@@ -29,7 +33,11 @@ export class Level {
       return new BucType(opts);
     });
 
+    this.extraProjectiles = [];
     this.currentBucIndex = 0;
+    this.score = 0;
+    this._scoredPigs = new Set();
+    this._scoredBlocks = new Set();
     this.built = true;
   }
 
@@ -43,11 +51,34 @@ export class Level {
   }
 
   getAllEntities() {
-    return [...this.blocks, ...this.pigs, ...this.bucs];
+    return [...this.blocks, ...this.pigs, ...this.bucs, ...this.extraProjectiles];
   }
 
   getAliveEnemies() {
     return this.pigs.filter((p) => p.alive);
+  }
+
+  updateScore() {
+    // Score for killed pigs
+    for (let i = 0; i < this.pigs.length; i++) {
+      if (!this.pigs[i].alive && !this._scoredPigs.has(i)) {
+        this._scoredPigs.add(i);
+        this.score += 5000;
+      }
+    }
+    // Score for destroyed blocks
+    for (let i = 0; i < this.blocks.length; i++) {
+      if (!this.blocks[i].alive && !this._scoredBlocks.has(i)) {
+        this._scoredBlocks.add(i);
+        this.score += 500;
+      }
+    }
+  }
+
+  getFinalScore() {
+    // Bonus for remaining bucs
+    const remainingBucs = Math.max(0, this.bucs.length - this.currentBucIndex);
+    return this.score + remainingBucs * 3000;
   }
 
   isWin() {
@@ -55,21 +86,32 @@ export class Level {
   }
 
   isLoss() {
-    return this.currentBucIndex >= this.bucs.length && this.getAliveEnemies().length > 0;
+    const allBucsUsed = this.currentBucIndex >= this.bucs.length;
+    const noExtraMoving = this.extraProjectiles.every(e => !e.alive || !e.physical.checkIfMoving());
+    const allBucsStopped = this.bucs.every(b => !b.hasBeenShot || !b.physical.checkIfMoving());
+    return allBucsUsed && noExtraMoving && allBucsStopped && this.getAliveEnemies().length > 0;
   }
 
   update(dt) {
     for (const entity of this.getAllEntities()) {
       entity.update(dt);
     }
+    this.updateScore();
   }
 
   draw(ctx) {
     if (this.cannon) this.cannon.draw(ctx);
-    for (const block of this.blocks) block.draw(ctx);
-    for (const pig of this.pigs) pig.draw(ctx);
+    for (const block of this.blocks) {
+      if (block.alive) block.draw(ctx);
+    }
+    for (const pig of this.pigs) {
+      if (pig.alive) pig.draw(ctx);
+    }
     for (const buc of this.bucs) {
-    if (buc.hasBeenShot) buc.draw(ctx);
-}
+      if (buc.hasBeenShot) buc.draw(ctx);
+    }
+    for (const proj of this.extraProjectiles) {
+      if (proj.alive) proj.draw(ctx);
+    }
   }
 }

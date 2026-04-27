@@ -1,5 +1,5 @@
-import { Block } from "./Block.js";
-import { Vector2 } from "./Vector2.js";
+import { Block } from "./../Block.js";
+import { Vector2 } from "./../Vector2.js";
 
 export class DynamiteBlock extends Block {
   constructor(options = {}) {

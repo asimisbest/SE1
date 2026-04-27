@@ -9,6 +9,7 @@ import { Level8 } from './classes/Levels/Level8.js';
 import { Level9 } from './classes/Levels/Level9.js';
 import { Level10 } from './classes/Levels/Level10.js';
 import { Vector2 } from './classes/Vector2.js';
+import { Buc } from './classes/Buc.js';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -28,6 +29,7 @@ const backToMenu = document.getElementById('backToMenu');
 const gameHUD = document.getElementById('gameHUD');
 const retryBtn = document.getElementById('retryBtn');
 const exitBtn = document.getElementById('exitBtn');
+const nextLevelBtn = document.getElementById('nextLevelBtn');
 
 // Registry — add new level classes here as they are created
 const LEVELS = {
@@ -50,6 +52,7 @@ let waveOffset = 0;
 let level = null;
 let lastTime = null;
 let winLossTimer = 0;
+let abilityUsedThisShot = false;
 
 let aimX = 140;
 let aimY = canvas.height - 160;
@@ -73,10 +76,17 @@ levelsBtn.onclick = () => {
 
 retryBtn.onclick = () => startLevel(currentLevel);
 
+nextLevelBtn.onclick = () => {
+    if (currentLevel < 10 && LEVELS[currentLevel + 1]) {
+        startLevel(currentLevel + 1);
+    }
+};
+
 exitBtn.onclick = () => {
     running = false;
     level = null;
     winLossTimer = 0;
+    nextLevelBtn.classList.add('hidden');
     gameHUD.classList.add('hidden');
     menu.style.display = 'flex';
 };
@@ -99,7 +109,17 @@ canvas.addEventListener('mouseleave', () => {
 canvas.addEventListener('mousedown', (e) => {
   if (!running) return;
 
-  if (e.button === 0) { // left click only
+  if (e.button === 0) {
+    // Check if a buc is in flight and has an unused ability
+    if (level && !abilityUsedThisShot) {
+      const flyingBuc = level.bucs.find(b => b.hasBeenShot && b.physical.checkIfMoving() && b.ability && !b.ability.used);
+      if (flyingBuc) {
+        flyingBuc.useAbility();
+        abilityUsedThisShot = true;
+        handleAbilityEffects(flyingBuc);
+        return; // Don't start aiming
+      }
+    }
     isAiming = true;
   }
 });
@@ -118,7 +138,19 @@ canvas.addEventListener('touchstart', (e) => {
   aimX = pos.x;
   aimY = pos.y;
 
-  updateCannonAngle(); // ✅ ADD HERE TOO
+  updateCannonAngle();
+
+  // Check if a buc is in flight and has an unused ability
+  if (level && !abilityUsedThisShot) {
+    const flyingBuc = level.bucs.find(b => b.hasBeenShot && b.physical.checkIfMoving() && b.ability && !b.ability.used);
+    if (flyingBuc) {
+      flyingBuc.useAbility();
+      abilityUsedThisShot = true;
+      handleAbilityEffects(flyingBuc);
+      e.preventDefault();
+      return;
+    }
+  }
 
   isAiming = true;
 
@@ -164,6 +196,8 @@ function startLevel(num) {
     menu.style.display = 'none';
     levelsPage.classList.add('hidden');
     gameHUD.classList.remove('hidden');
+    nextLevelBtn.classList.add('hidden');
+    abilityUsedThisShot = false;
     running = true;
 }
 
@@ -180,8 +214,13 @@ function resolveGroundCollisions(entities) {
             e.position.y -= b.bottom - GROUND_Y;
             const impact = Math.abs(e.physical.velocity.y);
             e.physical.velocity.y = -e.physical.velocity.y * e.physical.restitution;
-            e.physical.velocity.x *= 0.85;
+            e.physical.velocity.x *= 0.7; // stronger ground friction
+            e.physical.wake();
             if (impact > DAMAGE_THRESHOLD) e.takeDamage(impact * 0.05);
+            // Stop micro-bouncing
+            if (Math.abs(e.physical.velocity.y) < 10) {
+                e.physical.velocity.y = 0;
+            }
         }
     }
 }
@@ -286,47 +325,111 @@ function resolveEntityCollisions(entities) {
     }
 }
 
+function handleAbilityEffects(buc) {
+    if (!level) return;
+    // Handle explosion ability
+    if (buc._pendingExplosion) {
+        const explosion = buc._pendingExplosion;
+        const allEnts = level.getAllEntities().filter(e => e.alive && e !== buc);
+        for (const target of allEnts) {
+            const diff = target.position.subtract(explosion.origin);
+            const dist = diff.magnitude();
+            if (dist > explosion.radius || dist === 0) continue;
+            const falloff = 1 - dist / explosion.radius;
+            const damage = Math.round(explosion.damage * falloff);
+            target.takeDamage(damage);
+            target.isStatic = false;
+            target.physical.wake();
+            const dir = diff.normalize();
+            const force = dir.scale(explosion.force * falloff);
+            target.physical.velocity = target.physical.velocity.add(force);
+        }
+        buc._pendingExplosion = null;
+        buc.alive = false; // bomber buc dies on explosion
+    }
+    // Handle split ability
+    if (buc._pendingSplits && buc._pendingSplits.length > 0) {
+        for (const splitData of buc._pendingSplits) {
+            const fragment = new Buc({ width: 24, height: 24, health: 999 });
+            fragment.position.x = splitData.x;
+            fragment.position.y = splitData.y;
+            fragment.hasBeenShot = true;
+            fragment.isSplitFragment = true;
+            fragment.physical.velocity = new Vector2(splitData.vx, splitData.vy);
+            fragment.physical.mass = 2.5;
+            fragment._bodyColor = "#2563eb";
+            fragment._fallbackColor = "#2563eb";
+            level.extraProjectiles.push(fragment);
+        }
+        buc._pendingSplits = null;
+    }
+}
+
 function update(dt) {
     if (!running || !level) return;
     level.update(dt);
     const alive = level.getAllEntities().filter(e => e.alive);
+
+    // Process any pending ability effects each frame
+    for (const buc of [...level.bucs, ...level.extraProjectiles]) {
+        if (buc._pendingExplosion || (buc._pendingSplits && buc._pendingSplits.length > 0)) {
+            handleAbilityEffects(buc);
+        }
+    }
 
     // WAKE UP UN-SUPPORTED STATIC BLOCKS
     for (const e of alive) {
         if (!e.isStatic) continue;
         let supported = false;
         const b = e.getBounds();
-        if (b.bottom >= GROUND_Y - 5) {
+        if (b.bottom >= GROUND_Y - 3) {
             supported = true;
         } else {
             for (const other of alive) {
                 if (e === other) continue;
                 const o = other.getBounds();
-                if (o.top >= b.bottom - 5 && o.top <= b.bottom + 5) {
-                    if (b.right > o.left && b.left < o.right) {
+                if (o.top >= b.bottom - 3 && o.top <= b.bottom + 3) {
+                    if (b.right > o.left + 2 && b.left < o.right - 2) {
                         supported = true;
                         break;
                     }
                 }
             }
         }
-        if (!supported) e.isStatic = false;
+        if (!supported) {
+            e.isStatic = false;
+            e.physical.wake();
+        }
     }
 
-    resolveGroundCollisions(alive);
-    resolveEntityCollisions(alive);
+    // Multi-pass collision resolution for stability
+    for (let pass = 0; pass < 4; pass++) {
+        resolveGroundCollisions(alive);
+        resolveEntityCollisions(alive);
+    }
 
-    if (level.isWin() || level.isLoss()) {
+    if (level.isWin()) {
         winLossTimer += dt;
-        if (winLossTimer > 3) {
-            if (level.isWin()) {
-                unlockedLevel = Math.max(unlockedLevel, currentLevel + 1);
-            }
+        nextLevelBtn.classList.remove('hidden');
+        if (winLossTimer > 5) {
+            unlockedLevel = Math.max(unlockedLevel, currentLevel + 1);
             running = false;
             level = null;
             winLossTimer = 0;
+            nextLevelBtn.classList.add('hidden');
             gameHUD.classList.add('hidden');
-            levelsPage.classList.remove('hidden'); // Return to level select page instead of main menu
+            levelsPage.classList.remove('hidden');
+            createLevels();
+        }
+    } else if (level.isLoss()) {
+        winLossTimer += dt;
+        if (winLossTimer > 3) {
+            running = false;
+            level = null;
+            winLossTimer = 0;
+            nextLevelBtn.classList.add('hidden');
+            gameHUD.classList.add('hidden');
+            levelsPage.classList.remove('hidden');
             createLevels();
         }
     } else {
@@ -416,6 +519,7 @@ function shootCannon() {
     buc.position.y = y;
     
     buc.launch(new Vector2(vx, vy));
+    abilityUsedThisShot = false;
     level.nextBuc();
   }
   isAiming = false;
@@ -542,27 +646,51 @@ function render() {
       ctx.fillStyle = '#f9d56e';
       ctx.fillText(`Level ${currentLevel}`, 16, 40);
 
+      // Score display
+      ctx.font = 'bold 18px Arial, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.strokeStyle = '#041e42';
+      ctx.lineWidth = 3;
+      ctx.strokeText(`Score: ${level.score}`, canvas.width - 16, 40);
+      ctx.fillStyle = '#ffc72c';
+      ctx.fillText(`Score: ${level.score}`, canvas.width - 16, 40);
+
       if (level.isWin() || level.isLoss()) {
           ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
       if (level.isWin()) {
+          ctx.textAlign = 'center';
           ctx.font = 'bold 48px Georgia, serif';
           ctx.strokeStyle = '#000';
           ctx.lineWidth = 6;
-          ctx.strokeText("LEVEL WON", canvas.width / 2, canvas.height / 2);
+          ctx.strokeText("LEVEL WON!", canvas.width / 2, canvas.height / 2 - 30);
           ctx.fillStyle = '#4ade80';
-          ctx.textAlign = 'center';
-          ctx.fillText("LEVEL WON", canvas.width / 2, canvas.height / 2);
+          ctx.fillText("LEVEL WON!", canvas.width / 2, canvas.height / 2 - 30);
+          // Final score
+          ctx.font = 'bold 24px Georgia, serif';
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 3;
+          ctx.strokeText(`Final Score: ${level.getFinalScore()}`, canvas.width / 2, canvas.height / 2 + 15);
+          ctx.fillStyle = '#ffc72c';
+          ctx.fillText(`Final Score: ${level.getFinalScore()}`, canvas.width / 2, canvas.height / 2 + 15);
+          // Next level hint
+          ctx.font = '16px Georgia, serif';
+          ctx.fillStyle = '#ccc';
+          ctx.fillText("Click 'Next Level' to continue", canvas.width / 2, canvas.height / 2 + 45);
       } else if (level.isLoss()) {
+          ctx.textAlign = 'center';
           ctx.font = 'bold 48px Georgia, serif';
           ctx.strokeStyle = '#000';
           ctx.lineWidth = 6;
-          ctx.strokeText("LEVEL FAILED", canvas.width / 2, canvas.height / 2);
+          ctx.strokeText("LEVEL FAILED", canvas.width / 2, canvas.height / 2 - 15);
           ctx.fillStyle = '#f87171';
-          ctx.textAlign = 'center';
-          ctx.fillText("LEVEL FAILED", canvas.width / 2, canvas.height / 2);
+          ctx.fillText("LEVEL FAILED", canvas.width / 2, canvas.height / 2 - 15);
+          // Retry hint
+          ctx.font = '18px Georgia, serif';
+          ctx.fillStyle = '#ccc';
+          ctx.fillText("Click 'Retry' to try again", canvas.width / 2, canvas.height / 2 + 20);
       }
     }
   }

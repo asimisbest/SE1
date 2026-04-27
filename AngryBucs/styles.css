@@ -66,6 +66,16 @@ canvas {
 	color: #fff;
 }
 
+.hud-btn.next-level {
+	border-color: #4ade80;
+	color: #4ade80;
+}
+
+.hud-btn.next-level:hover {
+	background: #4ade80;
+	color: #0f1a2f;
+}
+
 /* ================= MENUS ================= */
 .menu {
 	position: absolute;

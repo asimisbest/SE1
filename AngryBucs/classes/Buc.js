@@ -13,6 +13,8 @@ export class Buc extends Entity {
     this._fallbackColor = "#041e42";
     this.physical.mass = 4;
     this.physical.restitution = 0.35;
+    this.facingRight = true;
+    this.isSplitFragment = false; // true for split projectiles
   }
 
   useAbility() {
@@ -23,10 +25,16 @@ export class Buc extends Entity {
   launch(velocity) {
     this.hasBeenShot = true;
     this.physical.velocity = velocity.clone();
+    this.facingRight = velocity.x >= 0;
+    this.physical.wake();
   }
 
   update(dt) {
     if (!this.hasBeenShot) return;
+    // Update facing direction based on velocity
+    if (Math.abs(this.physical.velocity.x) > 5) {
+      this.facingRight = this.physical.velocity.x >= 0;
+    }
     super.update(dt);
   }
 
@@ -36,16 +44,22 @@ export class Buc extends Entity {
     ctx.save();
     ctx.translate(this.position.x, this.position.y);
 
+    // Flip horizontally if facing left
+    if (!this.facingRight) {
+      ctx.scale(-1, 1);
+    }
 
     // Determine colors
     const isYellowBody = this._bodyColor === "#facc15";
+    const isRedBody = this._bodyColor === "#dc2626";
+    const isBlueBody = this._bodyColor === "#2563eb";
     const bodyColor = this._bodyColor || "#041e42";
-    const contrastColor = isYellowBody ? "#041e42" : "#ffc72c"; // Navy text for yellow buc, Gold for navy buc
+    const contrastColor = isYellowBody ? "#041e42" : isRedBody ? "#fff" : isBlueBody ? "#fff" : "#ffc72c";
 
     // --- Gold/Navy outer glow ring ---
     ctx.beginPath();
     ctx.arc(0, 0, r + 2, 0, Math.PI * 2);
-    ctx.strokeStyle = isYellowBody ? "rgba(4,30,66,0.3)" : "rgba(255,199,44,0.35)";
+    ctx.strokeStyle = isYellowBody ? "rgba(4,30,66,0.3)" : isRedBody ? "rgba(255,100,0,0.35)" : isBlueBody ? "rgba(100,150,255,0.35)" : "rgba(255,199,44,0.35)";
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -53,8 +67,19 @@ export class Buc extends Entity {
     ctx.beginPath();
     ctx.arc(0, 0, r, 0, Math.PI * 2);
     const bodyGrad = ctx.createRadialGradient(-r*0.2, -r*0.2, r*0.1, 0, 0, r);
-    bodyGrad.addColorStop(0, isYellowBody ? "#fce44d" : "#0a2d5c");
-    bodyGrad.addColorStop(1, bodyColor);
+    if (isRedBody) {
+      bodyGrad.addColorStop(0, "#ef4444");
+      bodyGrad.addColorStop(1, "#dc2626");
+    } else if (isBlueBody) {
+      bodyGrad.addColorStop(0, "#3b82f6");
+      bodyGrad.addColorStop(1, "#2563eb");
+    } else if (isYellowBody) {
+      bodyGrad.addColorStop(0, "#fce44d");
+      bodyGrad.addColorStop(1, bodyColor);
+    } else {
+      bodyGrad.addColorStop(0, "#0a2d5c");
+      bodyGrad.addColorStop(1, bodyColor);
+    }
     ctx.fillStyle = bodyGrad;
     ctx.fill();
     ctx.strokeStyle = contrastColor;
