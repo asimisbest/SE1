@@ -27,6 +27,8 @@ export class Block extends Entity {
         return { fill: "#6b7280", stroke: "#4b5563" };
       case "ice":
         return { fill: "#7dd3fc", stroke: "#38bdf8" };
+      case "metal":
+        return { fill: "#9ca3af", stroke: "#4b5563" };
       default:
         return { fill: "#a16207", stroke: "#854d0e" };
     }

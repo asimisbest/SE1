@@ -1,4 +1,13 @@
 import { Level1 } from './classes/Levels/Level1.js';
+import { Level2 } from './classes/Levels/Level2.js';
+import { Level3 } from './classes/Levels/Level3.js';
+import { Level4 } from './classes/Levels/Level4.js';
+import { Level5 } from './classes/Levels/Level5.js';
+import { Level6 } from './classes/Levels/Level6.js';
+import { Level7 } from './classes/Levels/Level7.js';
+import { Level8 } from './classes/Levels/Level8.js';
+import { Level9 } from './classes/Levels/Level9.js';
+import { Level10 } from './classes/Levels/Level10.js';
 import { Vector2 } from './classes/Vector2.js';
 
 const canvas = document.getElementById('gameCanvas');
@@ -23,14 +32,24 @@ const exitBtn = document.getElementById('exitBtn');
 // Registry — add new level classes here as they are created
 const LEVELS = {
     1: Level1,
+    2: Level2,
+    3: Level3,
+    4: Level4,
+    5: Level5,
+    6: Level6,
+    7: Level7,
+    8: Level8,
+    9: Level9,
+    10: Level10,
 };
 
 let running = false;
 let currentLevel = 1;
-let unlockedLevel = 1;
+let unlockedLevel = 10;
 let waveOffset = 0;
 let level = null;
 let lastTime = null;
+let winLossTimer = 0;
 
 let aimX = 140;
 let aimY = canvas.height - 160;
@@ -57,6 +76,7 @@ retryBtn.onclick = () => startLevel(currentLevel);
 exitBtn.onclick = () => {
     running = false;
     level = null;
+    winLossTimer = 0;
     gameHUD.classList.add('hidden');
     menu.style.display = 'flex';
 };
@@ -140,6 +160,7 @@ function startLevel(num) {
     currentLevel = num;
     level = new LevelClass();
     level.build();
+    winLossTimer = 0;
     menu.style.display = 'none';
     levelsPage.classList.add('hidden');
     gameHUD.classList.remove('hidden');
@@ -269,8 +290,48 @@ function update(dt) {
     if (!running || !level) return;
     level.update(dt);
     const alive = level.getAllEntities().filter(e => e.alive);
+
+    // WAKE UP UN-SUPPORTED STATIC BLOCKS
+    for (const e of alive) {
+        if (!e.isStatic) continue;
+        let supported = false;
+        const b = e.getBounds();
+        if (b.bottom >= GROUND_Y - 5) {
+            supported = true;
+        } else {
+            for (const other of alive) {
+                if (e === other) continue;
+                const o = other.getBounds();
+                if (o.top >= b.bottom - 5 && o.top <= b.bottom + 5) {
+                    if (b.right > o.left && b.left < o.right) {
+                        supported = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (!supported) e.isStatic = false;
+    }
+
     resolveGroundCollisions(alive);
     resolveEntityCollisions(alive);
+
+    if (level.isWin() || level.isLoss()) {
+        winLossTimer += dt;
+        if (winLossTimer > 3) {
+            if (level.isWin()) {
+                unlockedLevel = Math.max(unlockedLevel, currentLevel + 1);
+            }
+            running = false;
+            level = null;
+            winLossTimer = 0;
+            gameHUD.classList.add('hidden');
+            levelsPage.classList.remove('hidden'); // Return to level select page instead of main menu
+            createLevels();
+        }
+    } else {
+        winLossTimer = 0;
+    }
 }
 
 // ================= DRAWING =================
@@ -406,13 +467,6 @@ function render() {
   drawBackground();
 
   if (running) {
-    ctx.font = 'bold 28px Georgia, serif';
-    ctx.strokeStyle = '#7a3e00';
-    ctx.lineWidth = 4;
-    ctx.strokeText(`Level ${currentLevel}`, 16, 40);
-    ctx.fillStyle = '#f9d56e';
-    ctx.fillText(`Level ${currentLevel}`, 16, 40);
-
     if (level) {
       level.draw(ctx);
       level.cannon.draw(ctx);
@@ -478,6 +532,38 @@ function render() {
       ctx.restore();
 
       drawTrajectoryPreview();
+
+      // UI OVERLAYS - Drawn last so they appear on top of blocks/pigs
+      ctx.font = 'bold 28px Georgia, serif';
+      ctx.textAlign = 'left';
+      ctx.strokeStyle = '#7a3e00';
+      ctx.lineWidth = 4;
+      ctx.strokeText(`Level ${currentLevel}`, 16, 40);
+      ctx.fillStyle = '#f9d56e';
+      ctx.fillText(`Level ${currentLevel}`, 16, 40);
+
+      if (level.isWin() || level.isLoss()) {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      if (level.isWin()) {
+          ctx.font = 'bold 48px Georgia, serif';
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 6;
+          ctx.strokeText("LEVEL WON", canvas.width / 2, canvas.height / 2);
+          ctx.fillStyle = '#4ade80';
+          ctx.textAlign = 'center';
+          ctx.fillText("LEVEL WON", canvas.width / 2, canvas.height / 2);
+      } else if (level.isLoss()) {
+          ctx.font = 'bold 48px Georgia, serif';
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 6;
+          ctx.strokeText("LEVEL FAILED", canvas.width / 2, canvas.height / 2);
+          ctx.fillStyle = '#f87171';
+          ctx.textAlign = 'center';
+          ctx.fillText("LEVEL FAILED", canvas.width / 2, canvas.height / 2);
+      }
     }
   }
 }
