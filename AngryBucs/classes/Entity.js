@@ -6,16 +6,19 @@ export class Entity {
     this.health = health;
     this.physical = new Physical();
     this.position = new Vector2(x, y);
+
     this.image = image;
     this.size = new Vector2(width, height);
     this.rotation = 0;
     this.alive = true;
+    this.isStatic = false;
   }
 
   update(dt) {
+    if (this.isStatic) return;
     this.physical.calculateForces(980, dt);
     this.position = this.physical.calculatePosition(this.position, dt);
-    this.rotation = this.physical.calculateRotation(dt);
+    this.rotation = this.physical.calculateRotation(this.rotation, dt);
   }
 
   takeDamage(amount) {

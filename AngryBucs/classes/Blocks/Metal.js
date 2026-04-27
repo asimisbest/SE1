@@ -1,6 +1,6 @@
 import { Block } from "./../Block.js";
 
-export class WoodBlock extends Block {
+export class MetalBlock extends Block {
   constructor(options = {}) {
     super({
       material: "metal",
